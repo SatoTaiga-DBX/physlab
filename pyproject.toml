@@ -1,0 +1,65 @@
+[project]
+name = "physlab"
+version = "0.1.0"
+description = "物理法則をシミュレーションして動画で眺めるための学習用ラボ"
+readme = "README.md"
+authors = [
+    { name = "Sato Taiga" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.5",
+    "scipy>=1.18.1",
+]
+
+[project.scripts]
+physlab = "physlab.presentation.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.11.29,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "import-linter>=2.17",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# tests/ を src/ と同じ階層に鏡写しにするため、各層に同名の test_pendulum.py を置けるようにする
+addopts = ["--import-mode=importlib"]
+
+# 層の依存ルール（docs/design/003-layered-architecture.md）。`uv run lint-imports` で検査する
+[tool.importlinter]
+root_package = "physlab"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Layers depend inward only"
+type = "layers"
+layers = [
+    "physlab.presentation",
+    "physlab.infrastructure",
+    "physlab.application",
+    "physlab.domain | physlab.numerics",
+]
+
+[[tool.importlinter.contracts]]
+name = "Inner layers do not import matplotlib"
+type = "forbidden"
+source_modules = [
+    "physlab.domain",
+    "physlab.numerics",
+    "physlab.application",
+]
+forbidden_modules = ["matplotlib"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "NPY"]
