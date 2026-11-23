@@ -201,7 +201,10 @@ uv run physlab run pendulum
 \end{simbox}
 
 出力される \path{outputs/mechanics/pendulum_energy_drift.png} は、単振り子（初期角 $\ang{120}$、
-$h=\qty{0.01}{s}$、\qty{100}{s}）で 3 手法のエネルギー誤差を比べた図である。
+$h=\qty{0.01}{s}$、\qty{100}{s}）で 3 手法のエネルギー誤差を比べた図である（図~\ref{fig:pendulum-energy-drift}）。
+
+\physfig[0.85]{pendulum-energy-drift}{3 手法のエネルギーの相対誤差 $\abs{E-E_0}/E_0$（対数軸）。
+前進オイラーは増え続け、RK4 は小さいがゆっくりドリフトし、速度ベルレは有界に振動する。}{pendulum-energy-drift}
 
 \begin{table}[htbp]
 \centering

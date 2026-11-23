@@ -1,6 +1,6 @@
 """単振り子の物理: 運動方程式・エネルギー・厳密な周期・小角近似解。
 
-設計書: docs/design/002-pendulum.md ／ 教科書: docs/textbook/01-mechanics/01-pendulum.md
+設計書: docs/design/002-pendulum.md ／ 教科書: 第 2 章「単振り子」
 
 運動方程式（質量 m の質点・長さ L の軽い棒・重力加速度 g、摩擦なし）::
 

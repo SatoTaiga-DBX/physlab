@@ -1,0 +1,918 @@
+\chapter{運動方程式}\label{ch:eom}
+\chapterinfo{★★★}{約 150 分}{2026-11-23}
+\correspondsto{ランダウ＝リフシッツ『力学』\cite{ll-mech} 第 I 章 §1〜§5}
+
+\begin{objectives}
+\begin{enumerate}
+  \item 自由度・一般座標・配位空間を説明し、運動の状態が $(q,\dot q)$ で決まることを例で示せる。
+  \item 最小作用の原理からラグランジュ方程式を導ける。
+  \item 真の運動は作用が「最小」とは限らず「停留」であることを、図と式で説明できる。
+  \item ガリレイの相対性原理から、自由な質点のラグランジアンが $\tfrac12mv^2$ に決まることを導ける。
+  \item 質点系のラグランジアン $T-U$ からニュートンの運動方程式が出ることを示し、一般座標で書き直せる。
+\end{enumerate}
+\end{objectives}
+
+\begin{note}
+この章はランダウ＝リフシッツ『力学』\cite{ll-mech} 第 I 章の内容を、筆者が自分の言葉で組み立て直し、
+図とシミュレーションを足したものである。文章や式の並びは同書の転載ではない。
+各節の見出しの下に対応する同書の節番号を示すので、原典と読み比べながら進めること。
+\end{note}
+
+\paragraph{前提}
+第\ref{ch:pendulum}章までの内容。偏微分と部分積分。数値積分の話（\ref{sec:verlet}節の速度ベルレ法）は
+\ref{sec:eom-relax}節で再び出てくる。
+
+%% ================================================================
+\section{導入：運動方程式を作り直す理由}\label{sec:eom-intro}
+
+ニュートンの運動方程式 $m\ddot{\bm r}=\bm F$ は、第\ref{ch:pendulum}章の単振り子でも役に立った。
+それでも力学を学び直すと、ほぼ必ず次のような形に出会う。
+\begin{equation}
+  \delta S=0,\qquad S=\int_{t_1}^{t_2}\Lagr\,\dd t.
+\end{equation}
+運動を「力」ではなく、\textbf{作用 $S$ という 1 つの量の停留条件}として書く立場である。
+なぜ回り道をするのか。理由は 3 つある。
+\begin{itemize}
+  \item 棒の張力のような\textbf{拘束力}を、最初から計算しなくてよくなる（単振り子で実際に見る）。
+  \item \textbf{座標の選び方}が自由になり、どの座標でも同じ形の方程式が得られる。
+  \item 対称性と保存則の関係（次の章）、さらには量子力学・場の理論への橋が、この形式で見えてくる。
+\end{itemize}
+
+この章の問いは、「運動を決める法則は、なぜ、どんな $\Lagr$ を使って $\delta S=0$ と書けるのか」である。
+筋道は次の 3 段である。
+\begin{enumerate}
+  \item（\ref{sec:gen-coords}節）系の状態を何で記述するか。
+  \item（\ref{sec:least-action}節）運動を決める原理を、作用の停留条件として述べる。
+  \item（\ref{sec:galilei}〜\ref{sec:system}節）時間・空間の性質とガリレイの相対性から、$\Lagr$ の形を決める。
+\end{enumerate}
+
+%% ================================================================
+\section{一般座標}\label{sec:gen-coords}
+\correspondsto{ランダウ＝リフシッツ §1}
+
+\subsection{質点と自由度}
+
+力学が扱う最も簡単な対象は\textbf{質点}、すなわち大きさを無視して 1 点とみなせる物体である。
+質点の位置は 3 つの座標、たとえば位置ベクトル $\bm r=(x,y,z)$ で決まる。
+その時間微分 $\bm v=\dot{\bm r}$ が速度、$\bm a=\ddot{\bm r}$ が加速度である。
+$N$ 個の質点の系は $3N$ 個の座標で決まる。
+
+ところが、質点を棒でつないだり針金に通したりすると、座標どうしが関係式（\textbf{拘束}）で結ばれ、
+独立に動かせる量の数は減る。
+
+\begin{defn}{自由度と一般座標}{dof}
+系の位置（配置）を一意に決めるのに必要な\textbf{独立な変数の数}を\textbf{自由度}といい、$s$ で表す。
+そのように選んだ $s$ 個の量 $q_1,q_2,\dots,q_s$ を\textbf{一般座標}、
+それらの時間微分 $\dot q_1,\dots,\dot q_s$ を\textbf{一般速度}という。
+\end{defn}
+
+一般座標は長さである必要はない。角度でも、位置が決まりさえすれば何でもよい。
+選び方に唯一の正解はなく、問題に合う座標を選べることがラグランジュ形式の強みである。
+
+\begin{table}[htbp]
+\centering
+\caption{自由度と一般座標の例}\label{tab:dof}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.38\linewidth}cL@{}}
+\toprule
+系 & 自由度 $s$ & 一般座標の例 \\
+\midrule
+空間を自由に動く質点 & 3 & $(x,y,z)$、または球座標 $(r,\theta,\varphi)$ \\
+平面上を自由に動く質点 & 2 & $(x,y)$、または極座標 $(r,\varphi)$ \\
+棒でつるした質点（単振り子） & 1 & 角度 $\theta$ \\
+球面上に拘束された質点（球面振り子） & 2 & $(\theta,\varphi)$ \\
+二重振り子 & 2 & $(\theta_1,\theta_2)$ \\
+空間を自由に動く $N$ 個の質点 & $3N$ & 各質点の $(x,y,z)$ \\
+剛体 & 6 & 重心の位置 3 つ＋向きを決める角 3 つ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{例：単振り子}
+質点の位置は 2 つの数 $(x,y)$ で表されるが、棒の長さが一定という拘束
+$x^2+y^2=\ell^2$ があるので、独立なのは 1 つだけである（図~\ref{fig:pend-constraint}）。
+角度 $\theta$ を選べば $x=\ell\sin\theta,\ y=-\ell\cos\theta$ と 1 つの数で位置が決まる。
+第\ref{ch:pendulum}章で「自由度は $\theta$ の 1 つ」と言ったのはこのことである。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth,line width=0.8pt]
+  \def\L{2.6}\def\th{38}
+  \coordinate (O) at (0,0);
+  \coordinate (P) at ({\L*sin(\th)},{-\L*cos(\th)});
+  \draw[gray,dashed] (-90-62:\L) arc[start angle=-152,end angle=-28,radius=\L];
+  \draw[gray,dashed] (O) -- (0,{-\L-0.2});
+  \draw[->,gray] (-0.3,0) -- (\L+0.9,0) node[right,black]{$x$};
+  \draw[->,gray] (0,-\L-0.5) -- (0,0.8) node[above,black]{$y$};
+  \draw[dotted] (P) -- (P |- O);
+  \draw[dotted] (P) -- (P -| O);
+  \draw[very thick] (O) -- (P) node[midway,above right]{$\ell$};
+  \fill (O) circle (2pt);
+  \fill[blue!60!black] (P) circle (4pt);
+  \draw[->] (0,-1.0) arc[start angle=-90,end angle=-90+\th,radius=1.0];
+  \node at ({0.35*sin(\th/2)},{-1.3}) {$\theta$};
+  \node[right=4pt] at (P) {$(x,y)$};
+  \node[align=left,anchor=west] at (3.6,-1.3) {拘束 $x^2+y^2=\ell^2$\\自由度 $s=2-1=1$\\一般座標 $q=\theta$};
+\end{tikzpicture}
+\caption{単振り子。2 つの座標 $(x,y)$ は拘束でつながっていて、独立なのは角度 $\theta$ の 1 つ。}
+\label{fig:pend-constraint}
+\end{figure}
+
+\subsection{運動の状態は $(q,\dot q)$ で決まる}
+
+次の事実が、ニュートン力学の出発点になる。
+
+\begin{principle}{力学的状態の決定性}{determinism}
+ある時刻のすべての一般座標 $q_i$ と一般速度 $\dot q_i$ が与えられれば、
+その後（そして、それ以前）の運動はすべて決まる。
+すなわち加速度は座標と速度（と時刻）の関数として決まる：
+\begin{equation}
+  \ddot q_i=f_i(q_1,\dots,q_s,\dot q_1,\dots,\dot q_s,t)\qquad(i=1,\dots,s).
+  \label{eq:eom-general}
+\end{equation}
+\end{principle}
+
+式~\eqref{eq:eom-general} が\textbf{運動方程式}である。$s$ 個の 2 階の微分方程式なので、
+解を 1 つに決めるのに必要な初期値は $q_i(t_0)$ と $\dot q_i(t_0)$ の $2s$ 個である。
+\textbf{位置だけでは足りず、速度まで与えて初めて運動が決まる}。
+
+図~\ref{fig:gc-same-q} は、単振り子を同じ初期角 $\theta(0)=\ang{60}$ から、初期角速度だけを変えて
+動かした結果である（RK4、$h=\qty{1}{ms}$）。出発点は同じなのに、運動はまったく違う。
+位相平面（右図）では、出発点が縦一列に並び、そこから別々の閉曲線が伸びる。
+
+\physfig[0.97]{gc-same-q}{同じ位置から出発しても、初期角速度が違えば運動は違う（単振り子、$\ell=\qty{1}{m}$）。
+左は $\theta(t)$、右は位相平面。右図の点が出発点。}{gc-same-q}
+
+折り返しの角度 $\theta_{\rm turn}$（振れの端）は、エネルギー保存~\eqref{eq:pend-energy} で
+$\omega=0$ とおいて、$\cos\theta_{\rm turn}=\cos\theta_0-\ell\,\omega_0^2/(2g)$ と決まる。
+数値解の最大角と比べると表~\ref{tab:turning} のとおり一致する。
+
+\begin{table}[htbp]
+\centering
+\caption{同じ $\theta_0=\ang{60}$ で初期角速度 $\omega_0$ を変えたときの、振れの端の角度}
+\label{tab:turning}
+\begin{tabular}{rcc}
+\toprule
+$\omega_0$ [rad/s] & 数値解の最大角 & エネルギー保存から \\
+\midrule
+$0$  & $\ang{60.000}$  & $\ang{60.000}$ \\
+$+2$ & $\ang{72.775}$  & $\ang{72.775}$ \\
+$-3$ & $\ang{87.634}$  & $\ang{87.634}$ \\
+$+4$ & $\ang{108.391}$ & $\ang{108.391}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+$\omega_0=\qty{6}{rad/s}$ では $\cos\theta_{\rm turn}=0.5-36/19.62<-1$ となり、折り返す点が存在しない。
+振り子は真上を越えて回り続ける（回転運動）。シミュレーションでも最大角は $\pi$ を超えた。
+
+\subsection{配位空間}
+
+$s$ 個の一般座標を軸にとった $s$ 次元の空間を\textbf{配位空間}という。
+系のある瞬間の配置は配位空間の\textbf{1 点}、系の運動は配位空間の\textbf{1 本の曲線}である。
+この見方が、\ref{sec:least-action}節で「経路」を考える土台になる。
+
+図~\ref{fig:gc-double-pendulum} は二重振り子（$m_1=m_2=\qty{1}{kg}$、$l_1=l_2=\qty{1}{m}$、
+初期角 $\theta_1=\ang{90},\theta_2=\ang{0}$）の \qty{10}{s} である。
+実空間では 2 つの錘が複雑に動くが、配位空間 $(\theta_1,\theta_2)$ では\textbf{1 点が曲線を描く}だけになる。
+
+\physfig[0.97]{gc-double-pendulum-config}{二重振り子。左: 実空間での先端の軌跡と 3 つの時刻の姿勢。
+右: 配位空間 $(\theta_1,\theta_2)$ の軌跡（色は時刻）。}{gc-double-pendulum}
+
+運動方程式は \ref{sec:system}節で導く。ここでは数値解の質を確かめておく（RK4、$h=\qty{1}{ms}$）。
+\begin{itemize}
+  \item 力学的エネルギー $E=T+U$（\ref{sec:gen-lagrangian}節）の最大の相対誤差は \qty{10}{s} で $1.6\times10^{-9}$。
+  \item 微小振動では基準振動の周期が理論値と一致する（低い方 \qty{2.62105}{s}、高い方 \qty{1.08568}{s}。
+    相対誤差はそれぞれ $3\times10^{-8}$、$9\times10^{-7}$）。
+\end{itemize}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run generalized-coordinates      # 図 2 枚と動画（outputs/mechanics/）
+\end{terminal}
+動画の左が実空間、右が配位空間。右の 1 点が動いた軌跡が、そのまま「系の運動」である。
+\end{simbox}
+
+%% ================================================================
+\section{最小作用の原理}\label{sec:least-action}
+\correspondsto{ランダウ＝リフシッツ §2}
+
+\subsection{ラグランジアンと作用}
+
+\begin{defn}{ラグランジアンと作用}{action}
+力学系は、一般座標・一般速度・時刻の関数 $\Lagr(q_1,\dots,q_s,\dot q_1,\dots,\dot q_s,t)$
+で特徴づけられる。これを\textbf{ラグランジアン}という。
+経路 $q(t)$（$t_1\le t\le t_2$）に対して
+\begin{equation}
+  S[q]=\int_{t_1}^{t_2}\Lagr(q,\dot q,t)\,\dd t
+  \label{eq:action}
+\end{equation}
+を\textbf{作用}という。$S$ は「関数 $q(t)$ を 1 つ決めると 1 つの数が決まる」対応で、
+関数の関数（\textbf{汎関数}）である。
+\end{defn}
+
+\begin{principle}{最小作用の原理（ハミルトンの原理）}{least-action}
+時刻 $t_1$ に系が位置 $q^{(1)}$、時刻 $t_2$ に位置 $q^{(2)}$ を占めるとき、その間の運動は、
+作用 $S$ が\textbf{停留}になる（最小になる）ように起こる。
+\end{principle}
+
+$\Lagr$ に $\ddot q$ や、それ以上の階数の微分が含まれないのは、\ref{sec:gen-coords}節の事実
+（状態は $(q,\dot q)$ で決まり、運動方程式は 2 階）と合わせるためである。
+もし $\Lagr$ が $\ddot q$ を含むと、得られる方程式は 4 階になり、決めるのに $q,\dot q,\ddot q,\dddot q$ の
+初期値が要ってしまう。
+
+\subsection{「経路の空間」の地形として見る}
+
+端点 $(t_1,q^{(1)})$ と $(t_2,q^{(2)})$ を結ぶ曲線は、無数にある。
+配位空間では、それぞれが「経路」である。作用 $S$ は各経路に 1 つの数を割り当てるので、
+\textbf{経路の空間の上に地形}ができる。最小作用の原理は、「真の運動はこの地形の谷底（停留点）にある」
+という主張である。
+
+\begin{intuition}
+経路 1 本を「地形の上の 1 地点」、その地点の高さを作用と考える。真の運動は、そこで\textbf{地面が水平になる点}
+（停留点）である。ここで「停留」とは、経路をわずかにずらしたとき、作用が 1 次の範囲では変わらないことをいう。
+谷底（最小）であることが多いが、山頂や鞍の形のこともある（\ref{sec:second-variation}節で見る）。
+\end{intuition}
+
+具体例で見る。質量 $m=\qty{1}{kg}$ の球が一様重力（$g=\qty{9.81}{m/s^2}$）の中で、
+$t=0$ に高さ 0、$t=\qty{2}{s}$ に高さ 0 を通る。$\Lagr=\tfrac12m\dot q^2-mgq$（$q$ は高さ）。
+真の運動はこの後 \ref{sec:el} 節で導く放物線 $q_*(t)=\tfrac12g\,t(2-t)$（頂点 \qty{4.905}{m}）である。
+これに、両端で 0 になる形 $\eta(t)=\sin(\pi t/\tau)$ を足した
+\begin{equation}
+  q_\varepsilon(t)=q_*(t)+\varepsilon\,\eta(t),\qquad \eta(t)=\sin\frac{\pi(t-t_1)}{\tau},\quad \tau=t_2-t_1
+  \label{eq:family}
+\end{equation}
+という経路の族を作り、各経路の作用を数値積分した（図~\ref{fig:la-path-family}）。
+
+\physfig[0.97]{la-path-family}{両端を固定した経路の族（左）と、それぞれの作用 $S(\varepsilon)$（右）。
+一様重力、$m=\qty{1}{kg}$、$\tau=\qty{2}{s}$。真の運動（$\varepsilon=0$）で作用が最小になる。}{la-path-family}
+
+結果は、真の運動（$\varepsilon=0$）で作用が最小になる放物線状の曲線である。数値は次のとおり。
+\begin{itemize}
+  \item 真の運動の作用 $S_*=\qty{-32.0787}{J.s}$。これは解析的な $-g^2\tau^3/24$ と一致する（問~\ref{ex:eom-free-fall}）。
+  \item $\varepsilon=\pm1,\pm2\,\mathrm{m}$ では、$S-S_*=1.2337,\ 4.9348\,\mathrm{J{\cdot}s}$。
+    すなわち $S(\varepsilon)=S_*+c\,\varepsilon^2$、$c=1.2337\,\mathrm{J{\cdot}s/m^2}$。
+    これは \ref{sec:second-variation}節の式~\eqref{eq:curvature} で $\omega=0$、$n=1$ とおいた
+    $c=\tfrac{m\tau}{4}(\pi/\tau)^2=\tfrac{\pi^2m}{4\tau}$ の値である。
+  \item $\varepsilon$ の 1 次の項は $-1.3\times10^{-6}$ とほぼ 0。\textbf{これが「停留」の意味}である。
+\end{itemize}
+
+\subsection{ラグランジュ方程式の導出}\label{sec:el}
+
+最小（停留）の条件を式にする。1 自由度で考える（自由度が増えても各座標に同じ議論を使うだけである）。
+真の経路 $q(t)$ を、端点を動かさずに $\delta q(t)$ だけずらす：
+\begin{equation}
+  q(t)\ \to\ q(t)+\delta q(t),\qquad \delta q(t_1)=\delta q(t_2)=0.
+\end{equation}
+このとき速度は $\dot q\to\dot q+\delta\dot q$、$\delta\dot q=\dd(\delta q)/\dd t$ である。作用の変化は、
+$\delta q,\delta\dot q$ について 1 次まで展開して
+\begin{equation}
+  \delta S=\int_{t_1}^{t_2}\left(\pdiff{\Lagr}{q}\,\delta q+\pdiff{\Lagr}{\dot q}\,\delta\dot q\right)\dd t.
+\end{equation}
+第 2 項を\textbf{部分積分}する：
+\begin{equation}
+  \int_{t_1}^{t_2}\pdiff{\Lagr}{\dot q}\,\delta\dot q\,\dd t
+  =\left[\pdiff{\Lagr}{\dot q}\,\delta q\right]_{t_1}^{t_2}-\int_{t_1}^{t_2}\diff{}{t}\!\left(\pdiff{\Lagr}{\dot q}\right)\delta q\,\dd t.
+\end{equation}
+端点で $\delta q=0$ なので、境界項は消える。したがって
+\begin{equation}
+  \delta S=\int_{t_1}^{t_2}\left[\pdiff{\Lagr}{q}-\diff{}{t}\pdiff{\Lagr}{\dot q}\right]\delta q\,\dd t=0.
+\end{equation}
+これが\textbf{任意の} $\delta q(t)$ について成り立つには、括弧の中が各時刻で 0 でなければならない。
+（もし時刻 $t_0$ で括弧が 0 でなければ、$t_0$ のまわりだけに山を作る $\delta q$ をとれば $\delta S\ne0$ になってしまう。）
+
+\begin{result}{ラグランジュ方程式（オイラー＝ラグランジュ方程式）}{lagrange}
+\begin{equation}
+  \diff{}{t}\!\left(\pdiff{\Lagr}{\dot q_i}\right)-\pdiff{\Lagr}{q_i}=0\qquad(i=1,\dots,s).
+  \label{eq:lagrange}
+\end{equation}
+\end{result}
+
+$\Lagr$ は $\dot q$ を含むので、$\dd/\dd t$ を作用させると $\ddot q$ が現れる。
+式~\eqref{eq:lagrange} は、まさに式~\eqref{eq:eom-general} の形をした $s$ 個の 2 階の方程式である。
+
+\paragraph{例 1：一様重力の質点}
+$\Lagr=\tfrac12m\dot q^2-mgq$ では $\partial\Lagr/\partial\dot q=m\dot q$、$\partial\Lagr/\partial q=-mg$ なので、
+式~\eqref{eq:lagrange} は $m\ddot q+mg=0$、つまり $\ddot q=-g$。
+端点 $q(0)=q(2)=0$ を満たす解は $q_*(t)=\tfrac12g\,t(2-t)$ で、上で使った放物線である。
+
+\paragraph{例 2：単振り子（張力を使わずに）}
+一般座標を $\theta$ とする。質点の速さは $\ell\dot\theta$、高さ（支点から上向き）は $-\ell\cos\theta$ なので
+\begin{equation}
+  \Lagr=\tfrac12m\ell^2\dot\theta^2+mg\ell\cos\theta .
+\end{equation}
+$\partial\Lagr/\partial\dot\theta=m\ell^2\dot\theta$、$\partial\Lagr/\partial\theta=-mg\ell\sin\theta$ より
+$m\ell^2\ddot\theta+mg\ell\sin\theta=0$、すなわち
+\begin{equation}
+  \ddot\theta=-\frac g\ell\sin\theta
+\end{equation}
+となって、第\ref{ch:pendulum}章の式~\eqref{eq:pend-eom} が\textbf{張力に一言も触れずに}出た。
+拘束力（張力）は最初から $\theta$ のとり方に吸収されている。これが一般座標を使う利点である。
+
+\subsection{最小か、鞍点か：作用の 2 次の変化}\label{sec:second-variation}
+
+最小作用の原理は「最小」と言いながら、数学的に保証されるのは「停留」だけである。
+どちらになるかを、解析解のある調和振動子 $\Lagr=\tfrac12m\dot q^2-\tfrac12m\omega^2q^2$ で調べる
+（自由粒子は $\omega=0$、一様重力は $\omega=0$ で 1 次の項が加わるだけである）。
+
+真の経路 $q_*$ に、モード $\eta_n(t)=\sin\bigl(n\pi(t-t_1)/\tau\bigr)$ を足す。
+任意の $\delta q$ はこのモードの重ね合わせで書ける。$\Lagr$ が $(q,\dot q)$ の 2 次式なので、
+作用は $\varepsilon$ のちょうど 2 次式になる：
+\begin{equation}
+  S(\varepsilon)=S_*+\varepsilon\int(m\dot q_*\dot\eta_n-m\omega^2q_*\eta_n)\dd t
+  +\varepsilon^2\int\left(\tfrac12m\dot\eta_n^2-\tfrac12m\omega^2\eta_n^2\right)\dd t .
+\end{equation}
+1 次の項は、部分積分して $\bigl[m\dot q_*\eta_n\bigr]-\int(m\ddot q_*+m\omega^2q_*)\eta_n\dd t$
+となり、境界項（$\eta_n=0$）と運動方程式（$\ddot q_*=-\omega^2q_*$）でともに 0 になる。
+2 次の項は $\int\dot\eta_n^2\dd t=(n\pi/\tau)^2\,\tau/2$、$\int\eta_n^2\dd t=\tau/2$ を使って
+\begin{equation}
+  \boxed{S(\varepsilon)=S_*+c_n\,\varepsilon^2,\qquad
+  c_n=\frac{m\tau}{4}\left[\left(\frac{n\pi}{\tau}\right)^2-\omega^2\right]}
+  \label{eq:curvature}
+\end{equation}
+を得る。$c_n>0$ なら $\eta_n$ の方向では最小、$c_n<0$ なら最大である。
+
+\begin{itemize}
+  \item 自由粒子・一様重力（$\omega=0$）: すべての $n$ で $c_n>0$。真の運動は常に最小。
+    $m>0$ であることが効いている（$m<0$ なら最大になり、最小作用の原理が成り立たない）。
+  \item 調和振動子で $\tau<\pi/\omega$: $n\pi/\tau\ge\pi/\tau>\omega$ なので、すべての $c_n>0$。最小。
+  \item 調和振動子で $\tau>\pi/\omega$: $c_1<0$。\textbf{最小ではなく鞍点}になる。
+\end{itemize}
+
+\physfig[0.97]{la-second-variation}{調和振動子（$m=\qty{1}{kg}$、$\omega=2\pi\,\mathrm{rad/s}$、
+$\pi/\omega=\qty{0.5}{s}$、両端 $q=1,0$）の $S(\varepsilon)-S_*$。
+短い区間では上がる（最小）。長い区間では第 1 モードで下がり、第 2 モードで上がる（鞍点）。}{la-second-variation}
+
+図~\ref{fig:la-second-variation} の係数は、数値積分で求めたものが式~\eqref{eq:curvature} と一致した：$\tau=\qty{0.3}{s}$ では
+$c_1=+5.264,\ c_2=+29.938$、$\tau=\qty{0.8}{s}$ では $c_1=-4.811,\ c_2=+4.441$
+（単位 $\mathrm{J{\cdot}s/m^2}$）。図~\ref{fig:la-curvature} は $c_n$ を $\tau$ の関数として描いたもので、
+零点は $\tau=n\pi/\omega$ である。
+
+\physfig[0.9]{la-curvature}{作用の曲率 $c_n(\tau)$。線は式~\eqref{eq:curvature}、点は数値積分。
+$\tau=\pi/\omega$ を越えると第 1 モードの曲率が負になる。}{la-curvature}
+
+\begin{intuition}
+なぜ $\tau=\pi/\omega$ が境目なのか。ばねの質点を $q=0$ から速さ $v$ で出すと $q=(v/\omega)\sin\omega t$ で、
+\textbf{速さ $v$ によらず、すべて同じ時刻 $t=\pi/\omega$ に $q=0$ へ戻ってくる}（焦点）。
+焦点を過ぎると、同じ端点を結ぶ真の運動の「すぐ隣」にもう 1 つ別の真の運動が存在し得る。
+その方向には作用が変わらない（曲率が 0 になる）ので、そこから先は最小でなくなる。
+最小作用の原理は、\textbf{十分短い時間でだけ}「最小」で、一般には「停留」と読むのが正しい。
+\end{intuition}
+
+\subsection{作用の地形（碗と鞍）}\label{sec:landscape}
+
+2 つのモードの振幅 $a,b$ を軸にとると、経路の空間のごく一部（2 次元）を「地形」として描ける：
+$q=q_*+a\eta_1+b\eta_2$。モードは直交するので $S-S_*=c_1a^2+c_2b^2$ である。
+
+\physfig[0.97]{la-landscape}{作用の地形 $S-S_*$。左は $\tau=\qty{0.3}{s}$（碗）、右は $\tau=\qty{0.8}{s}$（鞍）。
+星が真の運動。$a,b\in[-1,1]\,\mathrm{m}$。}{la-landscape}
+
+図~\ref{fig:la-landscape} の碗では、どちらに動いても $S-S_*$ が上がる（$0\le S-S_*\le35.2$）。鞍では、一方向に下がり
+（最小 $-4.81$）、別の方向には上がる（最大 $+4.44$）。星の位置、つまり真の運動は、どちらも
+勾配が 0 の「停留点」である。
+
+\subsection{作用を下げ続けると真の運動に収束する}\label{sec:eom-relax}
+
+地形があるなら、「でたらめな経路から出発して、作用を下げ続ければ谷底に着く」はずである。
+実際にやってみる。経路を時刻 $t_k=t_1+k\Delta t$ の値 $q_k$（$k=0,\dots,N$）で表し、
+連続の作用を和で置き換える（\textbf{離散作用}）。端点 $q_0,q_N$ は固定する：
+\begin{equation}
+  S_d=\sum_{k=0}^{N-1}\Delta t\left[\frac m2\left(\frac{q_{k+1}-q_k}{\Delta t}\right)^2
+  -\frac12\bigl(V(q_k)+V(q_{k+1})\bigr)\right].
+\end{equation}
+内部の節点 $q_k$ での勾配（$q_k$ で偏微分したもの）は
+\begin{equation}
+  \pdiff{S_d}{q_k}=\frac m{\Delta t}\,(2q_k-q_{k-1}-q_{k+1})-\Delta t\,V'(q_k).
+\end{equation}
+\textbf{この勾配が 0 という条件}は、書き直すと
+\begin{equation}
+  q_{k+1}-2q_k+q_{k-1}=-\frac{\Delta t^2}{m}V'(q_k)=\Delta t^2\,a_k
+  \label{eq:verlet-position}
+\end{equation}
+となる。第\ref{ch:ode}章の速度ベルレ法~\eqref{eq:verlet} から速度を消去すると、
+ちょうどこの式になる（$q_{n+1}-2q_n+q_{n-1}=\tfrac12h^2(a_{n-1}+a_n)+\tfrac12h^2(a_n-a_{n-1})=h^2a_n$）。
+つまり\textbf{速度ベルレ法とは、離散作用の停留条件そのもの}である。
+ベルレ法が長時間でもエネルギーがドリフトしない理由は、こうして作用の構造を受け継いでいるから、と説明される。
+
+作用を下げるために、最も単純な\textbf{最急降下法} $q_k\leftarrow q_k-\alpha\,\partial S_d/\partial q_k$
+を使う。刻み $\alpha=0.9\,\Delta t/(2m)$ は、勾配の最大の固有値 $4m/\Delta t$ から決まる安定性の上限の 0.9 倍である。
+式にすると、各節点を両隣の節点の平均のほうへ引き寄せる（拡散係数 $0.45$）操作と同じで、
+ギザギザが先になめらかになり、全体の形があとから収束する。
+
+\physfig[0.97]{la-relaxation}{でたらめな経路（反復 0）が、作用を下げ続けて放物線に収束する。左: 途中の経路。
+右: 作用の超過分 $S_d-S_*$（対数軸）。節点 41、$\Delta t=\qty{0.05}{s}$。}{la-relaxation}
+
+図~\ref{fig:la-relaxation} の結果（一様重力、$\tau=\qty{2}{s}$）:
+\begin{itemize}
+  \item 離散作用は $S_d=171.3\to-32.059\,\mathrm{J{\cdot}s}$。連続の解析値 $-32.079$ との差（$6\times10^{-4}$）は離散化の誤差。
+  \item 真の運動（放物線）との最大のずれは $8.30\to1.1\times10^{-9}\,\mathrm{m}$（8000 反復）。
+    反復 20 回で $6.2\,\mathrm{m}$、およそ 1500 回で $10\,\mathrm{cm}$ に入る。
+  \item 一様重力では $V$ が 1 次式なので、離散作用の停留点は放物線に\textbf{節点上で厳密に}一致する
+    （勾配の最大値 $10^{-10}$ 未満をテストで確認）。調和振動子では $O(\Delta t^2)$ の差が残る
+    （最大のずれ $1.0\times10^{-4}$）。
+\end{itemize}
+
+\begin{note}
+この方法は\textbf{最小点}があるときにしか使えない。$\tau>\pi/\omega$ の調和振動子は停留点が鞍点なので、
+作用を下げるほど真の運動から遠ざかってしまう（コードは \code{ValueError} で拒否する）。
+「停留点を探す」ことと「最小点を探す」ことは別である。停留点を探すには、勾配が 0 という連立方程式を解けばよい。
+\end{note}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run least-action      # 図 5 枚と動画（outputs/mechanics/）
+\end{terminal}
+動画の左で、でたらめな経路がだんだんなめらかになり、点線の放物線に重なる。右で作用が下がり続ける。
+\end{simbox}
+
+\subsection{ラグランジアンの不定性}\label{sec:lagr-ambiguity}
+
+\begin{result}{全微分を足しても運動方程式は変わらない}{total-derivative}
+$f(q,t)$ を座標と時刻の任意の関数として、$\Lagr'=\Lagr+\dfrac{\dd f}{\dd t}$ としても、
+ラグランジュ方程式は変わらない。また $\Lagr$ に定数をかけても変わらない。
+\end{result}
+
+証明は作用を見るだけでよい。$S'=S+\displaystyle\int_{t_1}^{t_2}\frac{\dd f}{\dd t}\dd t=S+f(q^{(2)},t_2)-f(q^{(1)},t_1)$。
+増えた分は\textbf{端点だけで決まる定数}で、経路を変えても変わらないので、$\delta S'=\delta S$ である。
+式でも確かめられる（1 自由度）。$\dd f/\dd t=\dot q\,\partial_qf+\partial_tf$ だから
+$\partial(\dd f/\dd t)/\partial\dot q=\partial_qf$、
+$\dd/\dd t$ すると $\dot q\,\partial_q^2f+\partial_t\partial_qf$。一方 $\partial(\dd f/\dd t)/\partial q=\dot q\,\partial_q^2f+\partial_q\partial_tf$。
+この 2 つは打ち消し合う。
+
+この不定性は \ref{sec:free-lagr}節で本質的に使う。
+
+%% ================================================================
+\section{ガリレイの相対性原理}\label{sec:galilei}
+\correspondsto{ランダウ＝リフシッツ §3}
+
+\subsection{慣性系}
+
+運動を記述するには、座標系（時計と物差し）が要る。どんな座標系でも法則が簡単になるわけではない。
+
+\begin{defn}{慣性系}{inertial}
+空間が一様（どこも同じ）かつ等方（どの向きも同じ）で、時間が一様（いつも同じ）であるような座標系を
+\textbf{慣性系}という。慣性系では、他から力を受けない（自由な）質点は等速直線運動をする。
+\end{defn}
+
+慣性系が 1 つあれば、それに対して一定の速度で動く座標系もまた慣性系になる。
+実験的な事実として、次が成り立つ。
+
+\begin{principle}{ガリレイの相対性原理}{galilei}
+すべての慣性系は力学的に同等である。すなわち、力学の法則（運動方程式）の形は、どの慣性系でも同じである。
+\end{principle}
+
+慣性系 $K$ に対して、一定の速度 $\bm V$ で動く慣性系 $K'$ を考える。点 P の位置は、図~\ref{fig:frames} のとおり
+\begin{equation}
+  \bm r=\bm r'+\bm V t,\qquad t=t' \qquad(\text{ガリレイ変換}),
+  \label{eq:galilei}
+\end{equation}
+と結ばれる（$t=0$ で原点が一致するとする）。$t=t'$ は、時間が系によらず共通である
+（絶対時間）というニュートン力学の前提である。両辺を時間微分して
+\begin{equation}
+  \bm v=\bm v'+\bm V,\qquad \bm a=\bm a'.
+\end{equation}
+\textbf{速度は系によって違うが、加速度は同じ}である。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth,line width=0.8pt,scale=1.0]
+  \coordinate (O) at (0,0);
+  \coordinate (Op) at (3.4,0.7);
+  \coordinate (P) at (5.6,2.7);
+  \draw[->] (-0.3,0) -- (2.3,0) node[right]{$x$};
+  \draw[->] (0,-0.3) -- (0,3.0) node[above]{$y$};
+  \node[below left] at (O) {$O$};
+  \draw[->,gray] ($(Op)+(-0.3,0)$) -- ($(Op)+(2.6,0)$) node[right]{$x'$};
+  \draw[->,gray] ($(Op)+(0,-0.3)$) -- ($(Op)+(0,2.6)$) node[above]{$y'$};
+  \node[below right,gray] at (Op) {$O'$};
+  \draw[->,red!70!black,very thick] (O) -- (Op) node[midway,above,sloped]{$\bm V t$};
+  \draw[->,blue!60!black,very thick] (O) -- (P) node[midway,above,sloped]{$\bm r$};
+  \draw[->,green!40!black,very thick] (Op) -- (P) node[midway,above,sloped]{$\bm r'$};
+  \fill (P) circle (2.5pt) node[above right]{P};
+  \node[anchor=east] at (-0.4,2.6) {$K$};
+  \node[gray,anchor=west] at ($(Op)+(0.55,2.9)$) {$K'$（速度 $\bm V$ で動く）};
+\end{tikzpicture}
+\caption{2 つの慣性系 $K,K'$ と点 P。$\bm r=\bm r'+\bm Vt$。}
+\label{fig:frames}
+\end{figure}
+
+\subsection{同じ運動を 2 つの系で見る（電車の投げ上げ）}
+
+力学の法則が同じ形、とは具体的にどういうことか。電車の中で球を真上に投げ上げる。
+電車に乗っている人（$K'$）には球が\textbf{まっすぐ上がって落ちる}ように見え、地面の人（$K$）には、
+電車が右へ動くので\textbf{放物線}に見える。運動の姿は違う。
+しかし\textbf{運動方程式は同じ形}――どちらの系でも $\ddot x=0,\ \ddot y=-g$――であるはずだ。
+
+電車の速さ $V=\qty{10}{m/s}$、投げ上げの初速 $\qty{7}{m/s}$ で、2 つの系で運動方程式を独立に解いた
+（RK4、$h=\qty{1}{ms}$、図~\ref{fig:gal-train}）。
+
+\physfig[0.97]{gal-train}{電車の中の投げ上げ。左は電車の中の人（$K'$）、右は地面の人（$K$）が見る球の位置
+（点は等しい時間間隔、色は時刻）。灰色の箱は電車の始めと終わりの位置。}{gal-train}
+
+\begin{itemize}
+  \item $K$ の軌跡は $K'$ の軌跡に $Vt$ を足したものに $10^{-9}\,\mathrm{m}$ 以内で一致する。
+  \item 位置の 2 階差分から求めた加速度は、どちらの系でも $(0,\ -9.81)\,\mathrm{m/s^2}$
+    （誤差 $10^{-6}$ 以内）。
+  \item 頂点の高さは \qty{2.497}{m}、滞空時間は約 \qty{1.427}{s}、$K$ での飛距離は \qty{14.27}{m}。
+  \item 運動エネルギー（単位質量あたり）は $K$ と $K'$ で違うが、差は一定で $\tfrac12V^2=\qty{50}{J/kg}$。
+    \textbf{エネルギーの値は系による}が、どちらの系でも保存する。
+\end{itemize}
+
+逆に、加速している電車の中では、球はまっすぐ上がらない（見かけの力がはたらく）。
+それは慣性系ではないので、ガリレイの相対性原理の対象外である。
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run galilean      # 図 3 枚と動画（outputs/mechanics/）
+\end{terminal}
+\end{simbox}
+
+%% ================================================================
+\section{自由な質点のラグランジアン}\label{sec:free-lagr}
+\correspondsto{ランダウ＝リフシッツ §4}
+
+ここで、2 つの事実（空間・時間の性質と、ガリレイの相対性）から、自由な質点の $\Lagr$ の形を決める。
+\textbf{形が決まる}ことがポイントで、あとは係数 $m$ だけが残る。
+
+\paragraph{ステップ 1: 一様性}
+時間と空間が一様なので、$\Lagr$ は時刻 $t$ にも位置 $\bm r$ にも陽に依らない。依るのは速度 $\bm v$ だけである。
+
+\paragraph{ステップ 2: 等方性}
+空間が等方なので、$\Lagr$ は $\bm v$ の向きに依らない。したがって $\bm v$ の大きさ、すなわち
+$v^2=\bm v\cdot\bm v$ だけの関数である：$\Lagr=\Lagr(v^2)$。
+
+\paragraph{ステップ 3: ガリレイの相対性}
+$K'$ が $K$ に対して微小な速度 $\bm V$ で動くとき、$\bm v'=\bm v-\bm V$ である。
+相対性原理は、$K'$ でも運動方程式が同じ形であることを求める。\ref{sec:lagr-ambiguity}節より、
+そのためには $\Lagr(v'^2)$ と $\Lagr(v^2)$ の差が\textbf{全微分 $\dd f/\dd t$} であれば十分である。
+$\bm V$ の 1 次まで展開すると
+\begin{equation}
+  \Lagr(v'^2)=\Lagr\bigl(v^2-2\bm v\cdot\bm V+V^2\bigr)
+  \ \simeq\ \Lagr(v^2)-2\,\pdiff{\Lagr}{(v^2)}\;\bm v\cdot\bm V.
+\end{equation}
+差 $-2\,\dfrac{\partial\Lagr}{\partial(v^2)}\,\bm v\cdot\bm V$ が全微分になる条件を考える。
+座標と時刻の関数 $f(\bm r,t)$ の全微分は $\dfrac{\dd f}{\dd t}=\pdiff ft+\bm v\cdot\pdiff f{\bm r}$ で、
+\textbf{$\bm v$ について 1 次式}である。差も $\bm v$ の 1 次式でなければならないから、
+$\partial\Lagr/\partial(v^2)$ は $\bm v$ に依らない\textbf{定数}である。この定数を $m/2$ とおけば
+$\Lagr=\tfrac12mv^2$ となる。
+
+\begin{result}{自由な質点のラグランジアン}{free-lagrangian}
+\begin{equation}
+  \Lagr=\tfrac12\,m\,v^2 .
+\end{equation}
+定数 $m$ を質点の\textbf{質量}という。
+\end{result}
+
+\paragraph{ステップ 4: 有限の変換の確認}
+微小な $\bm V$ で確かめたので、有限の $\bm V$ でも確かめる。$\bm v=\bm v'+\bm V$ を代入すると
+\begin{equation}
+  \tfrac12mv^2=\tfrac12mv'^2+m\bm V\!\cdot\!\bm v'+\tfrac12mV^2
+  =\Lagr'+\diff{}{t}\left(m\bm V\!\cdot\!\bm r'+\tfrac12mV^2t\right).
+  \label{eq:boost-lagr}
+\end{equation}
+（$\bm V\cdot\bm v'=\dd(\bm V\cdot\bm r')/\dd t$、$\tfrac12mV^2=\dd(\tfrac12mV^2t)/\dd t$。）
+確かに、座標と時刻の関数 $f=m\bm V\!\cdot\!\bm r'+\tfrac12mV^2t$ の全微分だけがずれている。
+
+\paragraph{質量の正負と加法性}
+自由粒子では式~\eqref{eq:curvature} で $\omega=0$ とおいた $c_n=\tfrac{m\tau}{4}(n\pi/\tau)^2$ から、
+$m>0$ のとき直線経路で作用が最小になる。$m<0$ では最小作用の原理が成り立たない。
+また、互いに作用しない粒子の集まりの $\Lagr$ は各粒子の $\Lagr$ の和である（加法性）。
+その結果、全体としての $\Lagr=\sum_a\tfrac12m_av_a^2$ となり、$m_a$ の比は、
+相互作用させた実験（質量の比較）で決まる。
+
+\subsection{作用のずれを数値で見る}
+
+式~\eqref{eq:boost-lagr} は、作用が\textbf{端点だけで決まる定数}だけずれる、と言っている：
+\begin{equation}
+  S-S'=f(t_2)-f(t_1)=mV\,\Delta q'+\tfrac12mV^2\tau
+  \qquad(\Delta q'=q'(t_2)-q'(t_1),\ \text{1 次元の場合}).
+\end{equation}
+質量 $m=\qty{2}{kg}$ の自由粒子、$V=\qty{3}{m/s}$、端点 $(t,q)=(0,0)\to(\qty{2}{s},\qty{1}{m})$ で、
+両端を固定した経路の族 $q=q_{\rm line}+\varepsilon\sin(\pi t/\tau)$ の作用を、$K$ と $K'$ の両方で計算した
+（図~\ref{fig:gal-action-shift}）。
+
+\physfig[0.97]{gal-action-shift}{自由粒子の作用 $S$（$K$ 系）と $S'$（$K'$ 系）。曲線は平行にずれるだけで、
+最小の位置は同じ。差 $S-S'$ はどの経路でも $-12$。}{gal-action-shift}
+
+$K'$ での端点間の変位は $\Delta q'=(1-3\cdot2)-0=-5$。よって理論値は
+$S-S'=2\cdot3\cdot(-5)+\tfrac12\cdot2\cdot3^2\cdot2=-30+18=-12\,\mathrm{J{\cdot}s}$。
+13 個の $\varepsilon\in[-1.5,1.5]$ で、数値積分の $S-S'$ はすべて $-12.000000$
+（最大・最小の差は $10^{-14}$ のオーダー）だった。
+\textbf{ずれは経路によらない}ので、停留点は $K$ でも $K'$ でも同じ経路（$\varepsilon=0$）にある。
+
+%% ================================================================
+\section{質点系のラグランジアン}\label{sec:system}
+\correspondsto{ランダウ＝リフシッツ §5}
+
+\subsection{相互作用を入れる}
+
+互いに作用し合う質点の集まり（外から力を受けない\textbf{閉じた系}）を考える。
+相互作用がなければ、\ref{sec:free-lagr}節の最後のとおり $\Lagr=\sum_a\tfrac12m_av_a^2$ である。
+相互作用は、\textbf{座標だけの関数 $U$ を引く}ことで表す。
+
+\begin{result}{質点系のラグランジアン}{system-lagrangian}
+\begin{equation}
+  \Lagr=\underbrace{\sum_{a=1}^N\tfrac12m_av_a^2}_{T:\ \text{運動エネルギー}}
+  -\underbrace{U(\bm r_1,\dots,\bm r_N)}_{\text{ポテンシャルエネルギー}} .
+  \label{eq:system-lagrangian}
+\end{equation}
+\end{result}
+
+$U$ が座標だけに依るのは、ニュートン力学では相互作用が\textbf{瞬時に}伝わる（ある時刻の力は、その時刻の
+位置だけで決まる）という前提による。形 $T-U$ は、実験的に正しいことが確かめられている形である。
+ここでは、これがニュートンの運動方程式と一致することを確かめる。
+式~\eqref{eq:lagrange} を、質点 $a$ の座標（ベクトル成分ごとに）に使うと、
+$\partial\Lagr/\partial\bm v_a=m_a\bm v_a$、$\partial\Lagr/\partial\bm r_a=-\partial U/\partial\bm r_a$ だから
+\begin{equation}
+  m_a\dot{\bm v}_a=-\pdiff U{\bm r_a}=\bm F_a .
+\end{equation}
+\textbf{ニュートンの運動方程式}が出た。力は $\bm F_a=-\partial U/\partial\bm r_a$（$U$ の勾配）である。
+
+\paragraph{ガリレイ変換との整合}
+式~\eqref{eq:system-lagrangian} が相対性原理を満たすことも確かめる。$\bm v_a=\bm v_a'+\bm V$ を代入すると
+\begin{equation}
+  \Lagr=\Lagr'+\bm V\cdot\sum_am_a\bm v_a'+\tfrac12V^2\sum_am_a
+  =\Lagr'+\diff{}{t}\left(M\bm V\!\cdot\!\bm R'+\tfrac12MV^2t\right).
+\end{equation}
+$M=\sum m_a$ は全質量、$\bm R'=\sum m_a\bm r_a'/M$ は重心である。ずれは全微分のみで、
+さらに $U$ は位置の差 $\bm r_a-\bm r_b=\bm r'_a-\bm r'_b$ だけに依るので変換で変わらない。
+
+\subsection{二体問題を 2 つの慣性系で解く}
+
+万有引力の二体問題で試す。$\Lagr=\tfrac12m_1v_1^2+\tfrac12m_2v_2^2-U(r)$、$U=-Gm_1m_2/r$、$r=\abs{\bm r_1-\bm r_2}$。
+単位は $G=1$、$m_1=3$、$m_2=1$、近点の相対距離 $r_p=1$、離心率 $e=0.5$ とする。
+相対速度の 2 乗は $G(m_1+m_2)(1+e)/r_p=6$、長半径 $a=r_p/(1-e)=2$、周期は
+$T=2\pi\sqrt{a^3/(G(m_1+m_2))}=2\pi\sqrt2=8.886$（ケプラーの第 3 法則）。
+
+\begin{itemize}
+  \item 重心系 $K'$（重心が静止）で速度ベルレ法（$h=\qty{1}{ms}$）で解く。
+  \item 実験室系 $K$（$K'$ が $\bm V=(0.35,\,0.2)$ で動いて見える）では、\textbf{初速に $\bm V$ を足しただけ}の
+    初期条件で、別に独立に解く。
+\end{itemize}
+
+\physfig[0.97]{gal-two-body}{二体問題（$m_1=3,\ m_2=1$）。左: 重心系 $K'$、右: 実験室系 $K$。
+同じ運動が、系によって別の軌跡に見える。細い線は同じ時刻の 2 つの天体を結ぶ。}{gal-two-body}
+
+図~\ref{fig:gal-two-body} の結果（1.5 周期、動画は \path{outputs/mechanics/galilean_two_body.mp4}）:
+\begin{itemize}
+  \item $K$ で独立に解いた軌道 $-$（$K'$ の軌道 $+\bm Vt$）の最大は $4.1\times10^{-13}$。
+    \textbf{運動方程式はガリレイ変換で形を変えない}ので、2 つの解は丸め誤差で一致する。
+  \item $K$ の全運動量は $M\bm V=(1.4,\,0.8)$ のまま（誤差 $8\times10^{-15}$）。重心は等速直線運動をする
+    （$\bm R(t)=\bm Vt$ と $10^{-9}$ 以内で一致）。
+  \item $K'$ のエネルギーは $E'=-0.75=-Gm_1m_2/(2a)$（相対誤差 $1.4\times10^{-6}$）。
+    $K$ では $E=E'+\tfrac12MV^2=-0.75+0.325=-0.425$。差は $\tfrac12MV^2$ で定数。
+  \item 近点 $1.000$、遠点 $3.000$（$=a(1+e)$）。1 周期後の相対位置のずれは $5\times10^{-4}$
+    （周期 $T=2\pi\sqrt2$ が正しいことの確認）。
+\end{itemize}
+
+\subsection{一般座標でのラグランジアン}\label{sec:gen-lagrangian}
+
+拘束のある系では、直交座標 $\bm r_a$ を一般座標 $q_i$ の関数 $\bm r_a(q_1,\dots,q_s)$ として表す。
+すると $\dot{\bm r}_a=\sum_i(\partial\bm r_a/\partial q_i)\,\dot q_i$ だから、運動エネルギーは
+\begin{equation}
+  T=\sum_a\tfrac12m_a\dot{\bm r}_a^2=\tfrac12\sum_{i,k}a_{ik}(q)\,\dot q_i\dot q_k,
+  \qquad a_{ik}=\sum_am_a\,\pdiff{\bm r_a}{q_i}\cdot\pdiff{\bm r_a}{q_k}.
+  \label{eq:T-general}
+\end{equation}
+\textbf{一般速度の 2 次形式}で、係数 $a_{ik}$ は座標だけの関数である。$\Lagr=T-U(q)$ に式~\eqref{eq:lagrange} を使えば、
+座標の選び方によらず同じ形の方程式が得られる。作用は経路に対して 1 つの数を与える量で、
+座標の選び方に依らないからである。
+
+\paragraph{例：二重振り子}
+質量 $m_1,m_2$ を、長さ $l_1,l_2$ の棒でつなぐ。座標は
+$(x_1,y_1)=(l_1\sin\theta_1,\ -l_1\cos\theta_1)$、$(x_2,y_2)=(x_1+l_2\sin\theta_2,\ y_1-l_2\cos\theta_2)$。
+速さの 2 乗は $v_1^2=l_1^2\dot\theta_1^2$、
+$v_2^2=l_1^2\dot\theta_1^2+l_2^2\dot\theta_2^2+2l_1l_2\dot\theta_1\dot\theta_2\cos(\theta_1-\theta_2)$ で、
+$\Delta=\theta_1-\theta_2$ として
+\begin{align}
+  T&=\tfrac12(m_1+m_2)l_1^2\dot\theta_1^2+\tfrac12m_2l_2^2\dot\theta_2^2+m_2l_1l_2\,\dot\theta_1\dot\theta_2\cos\Delta,\\
+  U&=-(m_1+m_2)\,g\,l_1\cos\theta_1-m_2\,g\,l_2\cos\theta_2 .
+\end{align}
+$\theta_1$ についてのラグランジュ方程式を計算する。
+\begin{align}
+  \pdiff{\Lagr}{\dot\theta_1}&=(m_1+m_2)l_1^2\dot\theta_1+m_2l_1l_2\dot\theta_2\cos\Delta,\\
+  \diff{}{t}\pdiff{\Lagr}{\dot\theta_1}&=(m_1+m_2)l_1^2\ddot\theta_1+m_2l_1l_2\ddot\theta_2\cos\Delta
+    -m_2l_1l_2\dot\theta_2(\dot\theta_1-\dot\theta_2)\sin\Delta,\\
+  \pdiff{\Lagr}{\theta_1}&=-m_2l_1l_2\dot\theta_1\dot\theta_2\sin\Delta-(m_1+m_2)\,g\,l_1\sin\theta_1 .
+\end{align}
+差をとって整理すると、$\dot\theta_1\dot\theta_2\sin\Delta$ の項が打ち消し合い、
+\begin{equation}
+  (m_1+m_2)l_1^2\ddot\theta_1+m_2l_1l_2\cos\Delta\,\ddot\theta_2
+  =-m_2l_1l_2\,\dot\theta_2^2\sin\Delta-(m_1+m_2)\,g\,l_1\sin\theta_1 .
+\end{equation}
+$\theta_2$ も同様に計算して、まとめると
+\begin{equation}
+  \begin{pmatrix}(m_1+m_2)l_1^2 & m_2l_1l_2\cos\Delta\\ m_2l_1l_2\cos\Delta & m_2l_2^2\end{pmatrix}
+  \begin{pmatrix}\ddot\theta_1\\ \ddot\theta_2\end{pmatrix}=
+  \begin{pmatrix}-m_2l_1l_2\dot\theta_2^2\sin\Delta-(m_1+m_2)gl_1\sin\theta_1\\
+  \ \ m_2l_1l_2\dot\theta_1^2\sin\Delta-m_2gl_2\sin\theta_2\end{pmatrix}.
+  \label{eq:double-pendulum}
+\end{equation}
+棒の張力は一度も出てこない。これは 2 階の連立方程式で、状態 $(\theta_1,\theta_2,\dot\theta_1,\dot\theta_2)$ から
+$\ddot\theta_1,\ddot\theta_2$ が決まる（式~\eqref{eq:eom-general} の形）。
+
+式~\eqref{eq:double-pendulum} が本当に $\Lagr$ から出たものかを、\textbf{独立な数値計算}で確かめた。
+$\Lagr$ を数値微分して $\dd(\partial\Lagr/\partial\dot\theta)/\dd t-\partial\Lagr/\partial\theta$ を作り、
+運動方程式から決めた $\ddot\theta$ を代入すると、残差は 0（$10^{-5}$ 以内）になる。
+わざと $\sin\Delta$ の項の符号を壊すと、このテストは失敗した（検査が効くことの確認）。
+
+微小振動では、式~\eqref{eq:double-pendulum} の左辺の係数行列 $M_0=M(\bm 0)$ と、右辺を線形化した
+$K=\mathrm{diag}\bigl((m_1+m_2)gl_1,\ m_2gl_2\bigr)$ から、基準振動数が $\det(K-\omega^2M_0)=0$ で決まる。
+$m_1=m_2$、$l_1=l_2=l$ のとき
+\begin{equation}
+  \omega^2=(2\mp\sqrt2)\,\frac gl,
+\end{equation}
+$l=\qty{1}{m}$ で $\omega=2.3972,\ 5.7874\,\mathrm{rad/s}$。低い方は 2 本が同位相（$\theta_2/\theta_1=\sqrt2$）、
+高い方は逆位相（$-\sqrt2$）で振れる。数値解の周期は、それぞれ \qty{2.62105}{s}、\qty{1.08568}{s}で、
+理論値と $10^{-6}$ 以内で一致した。
+
+%% ================================================================
+\section{検証のまとめ}\label{sec:eom-check}
+
+この章で数値として使った主張と、その検証をまとめる（すべてテストで確認、コマンドは \code{uv run pytest}）。
+
+\begin{table}[htbp]
+\centering
+\caption{検証の一覧}\label{tab:eom-check}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.34\linewidth}Lr@{}}
+\toprule
+主張 & どう確かめたか & 結果 \\
+\midrule
+真の運動の作用 $S_*=-g^2\tau^3/24$ & 放物線の数値積分と解析式 & 相対 $10^{-6}$ \\
+$S(\varepsilon)=S_*+c_n\varepsilon^2$、$c_n$ の式 & 21 点の $\varepsilon$ を 2 次式で当てはめ、公式と比較 & 変化幅の $10^{-5}$ \\
+$c_1$ の零点は $\tau=n\pi/\omega$ & $\tau\in[0.2,1.6]$ の 141 点で $c_n$ の符号変化を補間 & $\pm10^{-3}$\,s \\
+作用の最小化が真の運動に収束 & 最急降下法 8000 反復、放物線との最大のずれ & $1.1\times10^{-9}$\,m \\
+離散作用の停留条件 $=$ ベルレ法 & 勾配 0 の式と更新式の比較 & 相対 $10^{-10}$ \\
+二重振り子の運動方程式 & $\Lagr$ の数値微分からの残差、エネルギー保存 & $10^{-5}$、$1.6\times10^{-9}$ \\
+ガリレイ変換での不変性 & $K$ と $K'$ で独立に解いた軌道の差 & $4.1\times10^{-13}$ \\
+作用のずれ $S-S'$ が経路によらない & 13 個の $\varepsilon$ で $S-S'$ を計算 & 相対 $10^{-8}$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{コードとの対応}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+種類 & 場所 \\
+\midrule
+設計書 & \path{docs/design/005-analytical-mechanics-ch1.md} \\
+物理（domain） & \path{src/physlab/domain/mechanics/lagrangian.py}（作用・停留経路・離散作用）、
+  \path{double_pendulum.py}、\path{two_body.py}、\path{galilean.py} \\
+数値（numerics） & \path{src/physlab/numerics/optimize.py}（最急降下法） \\
+ユースケース & \path{src/physlab/application/mechanics/least_action.py}、
+  \path{generalized_coordinates.py}、\path{galilean.py} \\
+描画 & \path{src/physlab/infrastructure/rendering/mechanics/} 以下の同名のファイル \\
+コマンド & \code{least-action}、\code{generalized-coordinates}、\code{galilean} \\
+テスト & \path{tests/domain/mechanics/}、\path{tests/application/mechanics/} \\
+知見 & \path{docs/knowledge/analytical-mechanics.md} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%% ================================================================
+\section{演習}\label{sec:eom-exercises}
+
+\begin{exercise}[基礎]{eom-dof}
+次の系の自由度を求めよ。(a) 平面上で、長さ $\ell$ の軽い棒の両端に質点をつけた亜鈴。
+(b) 空間で、長さ $\ell$ の軽い棒の両端に質点をつけた亜鈴。(c) 固定した円周上を動く 2 つの質点。
+(d) 空間を自由に動く 3 つの質点。
+\end{exercise}
+
+\begin{exercise}[基礎]{eom-free-fall}
+一様重力中の質点 $\Lagr=\tfrac12m\dot q^2-mgq$ から、ラグランジュ方程式を作って解き、
+$q(0)=q(2)=0$（$g=\qty{9.81}{m/s^2}$、$m=\qty{1}{kg}$）の真の運動と、その作用 $S_*$ を求めよ。
+\end{exercise}
+
+\begin{exercise}[基礎]{eom-pendulum-lagr}
+単振り子で、一般座標を $\theta$ としたときのラグランジアンから運動方程式を導き、
+棒の張力が現れないことを確かめよ。
+\end{exercise}
+
+\begin{exercise}[応用]{eom-curvature}
+調和振動子で $S(\varepsilon)=S_*+c_n\varepsilon^2$ の $c_n$ を求めよ。
+$m=\qty{1}{kg}$、$\omega=2\pi\,\mathrm{rad/s}$、$\tau=\qty{0.8}{s}$ のとき、$c_1,c_2$ の数値と符号は？
+\end{exercise}
+
+\begin{exercise}[応用]{eom-total-derivative}
+$\Lagr'=\Lagr+\dd f(q,t)/\dd t$ のラグランジュ方程式が、$\Lagr$ のものと同じであることを、
+式を使って示せ（1 自由度）。
+\end{exercise}
+
+\begin{exercise}[応用]{eom-quartic}
+自由粒子の $\Lagr=\tfrac12mv^2+\alpha v^4$（$\alpha\ne0$）は、ガリレイの相対性原理を満たすか。
+\ref{sec:free-lagr}節のステップ 3 の議論で調べよ。
+\end{exercise}
+
+\begin{exercise}[応用]{eom-double-modes}
+二重振り子で $m_1=m_2$、$l_1=l_2=l$ の微小振動の基準振動数 $\omega^2=(2\mp\sqrt2)g/l$ を導け。
+$l=\qty{1}{m}$ の値は？
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{eom-sim-tau}
+次を実行し、出力の $S_*$ と $c$ を、$\tau=\qty{1}{s}$ の理論値（$-g^2\tau^3/24$ と $\pi^2m/(4\tau)$）と比べよ。
+\begin{terminal}
+uv run physlab run least-action --duration 1.0 --no-video
+\end{terminal}
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{eom-sim-boost}
+次を実行する。$K$ での全運動量は $M\bm V$ のいくつになるか、予想してから出力で確かめよ。
+\begin{terminal}
+uv run physlab run galilean --drift-x 1.0 --drift-y 0 --no-video
+\end{terminal}
+また \code{--drift-x 0 --drift-y 0} では、「$K$ で解いた軌道と $K'$ の軌道の差」はどうなるか。
+\end{exercise}
+
+%% ================================================================
+\section{まとめ}\label{sec:eom-summary}
+
+\begin{summary}
+\begin{itemize}
+  \item 系の状態は一般座標とその時間微分 $(q,\dot q)$ で決まる。位置だけでは運動が決まらず、運動方程式は 2 階。
+  \item 運動は、端点を固定した経路のうち\textbf{作用 $S=\int\Lagr\,\dd t$ が停留}になるものである。
+    停留条件からラグランジュ方程式 $\tfrac{\dd}{\dd t}\pdiff{\Lagr}{\dot q_i}-\pdiff{\Lagr}{q_i}=0$ が出る。
+  \item 「最小」作用は十分短い時間のときだけ。調和振動子では $\tau>\pi/\omega$ で鞍点になる。
+  \item $\Lagr$ に全微分を足しても運動方程式は変わらない。作用は端点だけで決まる定数がずれる。
+  \item 空間・時間の一様性、等方性とガリレイの相対性から、自由な質点は $\Lagr=\tfrac12mv^2$ に決まる。
+  \item 質点系は $\Lagr=T-U$。ラグランジュ方程式はニュートンの運動方程式と同じで、一般座標でも同じ形に書ける。
+\end{itemize}
+\end{summary}
+
+\section{発展}\label{sec:eom-advanced}
+\begin{itemize}
+  \item 次の章（ランダウ＝リフシッツ §6〜§9）: エネルギー、運動量、角運動量の保存則は、
+    $\Lagr$ の時間・空間の一様性、等方性から導かれる（ネーターの定理）。
+  \item 最小作用の原理の読み物としてファインマン物理学 II 第 19 章\cite{feynman}。
+    量子力学では、すべての経路が寄与し、作用の停留点の近くだけが強め合う（経路積分）。
+  \item ハミルトン形式: $(q,\dot q)$ の代わりに $(q,p)$ を使う。位相空間の見方（第\ref{ch:pendulum}章）と直接つながる。
+\end{itemize}
+
+%% ================================================================
+\section{演習の解答}\label{sec:eom-solutions}
+
+\begin{solution}{eom-dof}
+(a) 位置 $(x_1,y_1,x_2,y_2)$ の 4 つに拘束 $(x_1-x_2)^2+(y_1-y_2)^2=\ell^2$ が 1 つ：$4-1=3$。
+(b) $6-1=5$。(c) 円周上の位置は各 1 つの角度で決まるので $1+1=2$。(d) $3\times3=9$。
+\end{solution}
+
+\begin{solution}{eom-free-fall}
+$\partial\Lagr/\partial\dot q=m\dot q$、$\partial\Lagr/\partial q=-mg$ より $m\ddot q=-mg$、すなわち $\ddot q=-g$。
+一般解 $q=A+Bt-\tfrac12gt^2$ に $q(0)=q(2)=0$ を入れて $A=0,\ B=g$。
+$q_*(t)=\tfrac12g\,t(2-t)$、頂点は $t=1$ で $q=g/2=\qty{4.905}{m}$。
+$\dot q_*=g(1-t)$ なので $S_*=\int_0^2\bigl[\tfrac12mg^2(1-t)^2-mg\cdot\tfrac12g\,t(2-t)\bigr]\dd t
+=\tfrac{g^2}{2}\cdot\tfrac23-\tfrac{g^2}{2}\cdot\tfrac43=-\tfrac{g^2}3=-\qty{32.08}{J.s}$
+（これは $-g^2\tau^3/24$、$\tau=2$ と同じ）。
+\end{solution}
+
+\begin{solution}{eom-pendulum-lagr}
+運動エネルギーは $\tfrac12m(\ell\dot\theta)^2$、位置エネルギーは $mg\cdot(-\ell\cos\theta)$ なので
+$\Lagr=\tfrac12m\ell^2\dot\theta^2+mg\ell\cos\theta$。
+$\diff{}{t}(m\ell^2\dot\theta)-(-mg\ell\sin\theta)=0$ より $\ddot\theta=-(g/\ell)\sin\theta$。
+張力は棒の方向にはたらき、質点の動きの方向（円周に沿う方向）には仕事をしないので、$\theta$ を座標にとる限り、
+$\Lagr$ にも方程式にも現れない。
+\end{solution}
+
+\begin{solution}{eom-curvature}
+$q=q_*+\varepsilon\eta_n$ を $S$ に入れ、$\varepsilon^2$ の項は $\int(\tfrac12m\dot\eta_n^2-\tfrac12m\omega^2\eta_n^2)\dd t$。
+$\int\dot\eta_n^2\dd t=(n\pi/\tau)^2\tau/2$、$\int\eta_n^2\dd t=\tau/2$ より
+$c_n=\tfrac{m\tau}4\bigl[(n\pi/\tau)^2-\omega^2\bigr]$。
+$\tau=0.8$、$\omega^2=(2\pi)^2=39.478$：
+$c_1=0.2\,[(\pi/0.8)^2-39.478]=0.2\,[15.421-39.478]=-4.811$（負：鞍点の原因）、
+$c_2=0.2\,[(2\pi/0.8)^2-39.478]=0.2\,[61.685-39.478]=+4.441$（正）。
+\end{solution}
+
+\begin{solution}{eom-total-derivative}
+$\tfrac{\dd f}{\dd t}=\dot q\,\pdiff fq+\pdiff ft$ なので
+$\pdiff{}{\dot q}\diff ft=\pdiff fq$、$\pdiff{}{q}\diff ft=\dot q\,\frac{\partial^2f}{\partial q^2}+\frac{\partial^2f}{\partial q\,\partial t}$。
+前者を $\dd/\dd t$ すると $\dot q\,\frac{\partial^2f}{\partial q^2}+\frac{\partial^2f}{\partial t\,\partial q}$。
+混合偏微分は順序によらないので、ラグランジュ方程式の左辺に加わる $\tfrac{\dd}{\dd t}\pdiff{}{\dot q}\tfrac{\dd f}{\dd t}-\pdiff{}{q}\tfrac{\dd f}{\dd t}$ は 0。
+\end{solution}
+
+\begin{solution}{eom-quartic}
+$\Lagr(v'^2)-\Lagr(v^2)\simeq-2\,\partial\Lagr/\partial(v^2)\;\bm v\cdot\bm V$。
+$\Lagr=\tfrac12mv^2+\alpha v^4$ では $\partial\Lagr/\partial(v^2)=\tfrac12m+2\alpha v^2$ なので、
+差は $-(m+4\alpha v^2)\,\bm v\cdot\bm V$。第 1 項 $-m\bm v\cdot\bm V$ は $\bm v$ の 1 次で全微分
+$-\dd(m\bm V\cdot\bm r)/\dd t$ だが、第 2 項 $-4\alpha v^2\,\bm v\cdot\bm V$ は $\bm v$ の 3 次式で、
+全微分（$\bm v$ の 1 次式）の形にならない。よって $\alpha\ne0$ ではガリレイの相対性原理を満たさない。
+\end{solution}
+
+\begin{solution}{eom-double-modes}
+$m_1=m_2=m$、$l_1=l_2=l$ では $M_0=ml^2\begin{pmatrix}2&1\\1&1\end{pmatrix}$、$K=mgl\begin{pmatrix}2&0\\0&1\end{pmatrix}$。
+$\det(K-\omega^2M_0)=0$ に $\lambda=\omega^2l/g$ とおくと
+$\det\begin{pmatrix}2-2\lambda&-\lambda\\-\lambda&1-\lambda\end{pmatrix}=2(1-\lambda)^2-\lambda^2=\lambda^2-4\lambda+2=0$。
+よって $\lambda=2\mp\sqrt2$。$l=\qty{1}{m}$ なら $\omega^2=(2\mp\sqrt2)\times9.81=5.7467,\ 33.494$、
+$\omega=2.3972,\ 5.7874\,\mathrm{rad/s}$（周期 \qty{2.6211}{s}、\qty{1.0857}{s}）。
+\end{solution}
+
+\begin{solution}{eom-sim-tau}
+$\tau=1$：$S_*=-g^2\tau^3/24=-96.236/24=-4.0098$、$c=\tfrac{m\tau}4(\pi/\tau)^2=\pi^2/4=2.4674$
+（\ref{sec:least-action}節の例の $\tau=2$ では $1.2337$。$c\propto1/\tau$ で、$\tau$ を半分にすると 2 倍）。
+実行結果の $S_*$ と $c$ はこれらに一致するはずである（一致しなければ、積分や当てはめを疑う）。
+\end{solution}
+
+\begin{solution}{eom-sim-boost}
+$M=m_1+m_2=4$ なので $M\bm V=(4.0,\ 0.0)$（実測 $(4.00000000,\ 2\times10^{-15})$）。
+ドリフト $(0,0)$ では $K=K'$ で同じ計算になるため、軌道の差は厳密に $0$。
+$(1,0)$ でも差は $2.2\times10^{-13}$ で、丸め誤差の範囲である。
+速度ベルレ法は加速度が相対位置だけに依るので、$\bm V$ を足しても更新式の形が変わらないためである。
+\end{solution}

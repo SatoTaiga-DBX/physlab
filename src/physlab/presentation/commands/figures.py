@@ -19,7 +19,9 @@ def generate_all(only: list[str] | None = None) -> list[Path]:
     providers = figure_providers()
     unknown = [n for n in (only or []) if n not in providers]
     if unknown:
-        raise ValueError(f"図を作るコマンドではありません: {', '.join(unknown)}（候補: {', '.join(providers)}）")
+        raise ValueError(
+            f"図を作るコマンドではありません: {', '.join(unknown)}（候補: {', '.join(providers)}）"
+        )
     made: list[Path] = []
     for name, module in providers.items():
         if only and name not in only:

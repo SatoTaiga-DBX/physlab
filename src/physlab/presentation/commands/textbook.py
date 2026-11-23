@@ -27,9 +27,13 @@ DEFAULT_TEX_DIR = "docs/textbook/tex"
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog=f"physlab run {NAME}", description=TITLE)
-    p.add_argument("--tex-dir", default=DEFAULT_TEX_DIR, help=f"TeX ソースの場所（既定 {DEFAULT_TEX_DIR}）")
+    p.add_argument(
+        "--tex-dir", default=DEFAULT_TEX_DIR, help=f"TeX ソースの場所（既定 {DEFAULT_TEX_DIR}）"
+    )
     p.add_argument("--no-figures", action="store_true", help="図を作り直さず、前回のものを使う")
-    p.add_argument("--preview", metavar="PAGES", help="PDF の指定ページを PNG にする（例: 3,5-7 / all）")
+    p.add_argument(
+        "--preview", metavar="PAGES", help="PDF の指定ページを PNG にする（例: 3,5-7 / all）"
+    )
     p.add_argument("--scale", type=float, default=1.4, help="--preview の拡大率")
     args = p.parse_args(argv)
 
@@ -43,7 +47,9 @@ def main(argv: list[str] | None = None) -> int:
     figures_dir = output_dir(FIGURES_TOPIC)
     missing = find_missing_figures(tex_dir, figures_dir)
     if missing:
-        print(f"TeX が参照する図が {figures_dir} にありません: {', '.join(missing)}", file=sys.stderr)
+        print(
+            f"TeX が参照する図が {figures_dir} にありません: {', '.join(missing)}", file=sys.stderr
+        )
         print("図を作る関数 figures() を持つコマンドを確認してください。", file=sys.stderr)
         return 1
 
@@ -57,7 +63,8 @@ def main(argv: list[str] | None = None) -> int:
     s = result.summary
     print(f"  -> {result.pdf}（{s.pages} ページ、{result.passes} 回のコンパイル）")
     if s.overfull_boxes:
-        print(f"  注意: 行・表がはみ出している箇所が {len(s.overfull_boxes)} か所（最大 {max(s.overfull_boxes):.0f}pt）")
+        count, worst = len(s.overfull_boxes), max(s.overfull_boxes)
+        print(f"  注意: はみ出した行・表が {count} か所（最大 {worst:.0f}pt）")
 
     if args.preview:
         pages = parse_pages(args.preview, count_pages(result.pdf))
@@ -66,7 +73,9 @@ def main(argv: list[str] | None = None) -> int:
 
     broken = [*s.undefined_references, *s.undefined_citations]
     if broken:
-        print(f"未解決の参照があります（\\ref / \\cite の鍵）: {', '.join(broken)}", file=sys.stderr)
+        print(
+            f"未解決の参照があります（\\ref / \\cite の鍵）: {', '.join(broken)}", file=sys.stderr
+        )
         return 1
     return 0
 

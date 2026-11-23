@@ -6,20 +6,42 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 import numpy as np
 
-from physlab.application.mechanics.pendulum import compare_energy_drift, compare_with_small_angle
+from physlab.application.mechanics.pendulum import (
+    compare_energy_drift,
+    compare_with_small_angle,
+    period_ratio_curve,
+    phase_portrait,
+)
 from physlab.domain.mechanics.pendulum import PendulumParams
 from physlab.infrastructure.rendering.mechanics.pendulum import (
     render_comparison_video,
     render_energy_drift_figure,
+    render_period_ratio_figure,
+    render_phase_portrait_figure,
 )
-from physlab.infrastructure.storage import output_path
+from physlab.infrastructure.storage import figure_path, output_path
 
 NAME = "pendulum"
 TITLE = "単振り子：大振幅での小角近似の破綻と、積分法のエネルギー保存"
 TOPIC = "mechanics"
+
+
+def figures() -> list[Path]:
+    """教科書の図 3 枚（``outputs/figures/pendulum-*.pdf``）。"""
+    energy = compare_energy_drift(PendulumParams(), 100.0, 0.01)
+    return [
+        render_period_ratio_figure(
+            # 注記する 30°・120° を格子点に含める（近い点の値でなく、ちょうどの値を示すため）
+            period_ratio_curve(np.union1d(np.linspace(1.0, 179.0, 300), [30.0, 120.0])),
+            figure_path("pendulum-period-ratio"),
+        ),
+        render_phase_portrait_figure(phase_portrait(), figure_path("pendulum-phase-portrait")),
+        render_energy_drift_figure(energy, figure_path("pendulum-energy-drift")),
+    ]
 
 
 def main(argv: list[str] | None = None) -> None:

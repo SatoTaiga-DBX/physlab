@@ -1,4 +1,7 @@
-"""LaTeX ビルド部品: ログの解析と図の存在確認は純粋関数でテストし、実コンパイルは lualatex があるときだけ。"""
+"""LaTeX ビルド部品。
+
+ログの解析と図の存在確認は純粋関数でテストする。実コンパイルは lualatex があるときだけ。
+"""
 
 import shutil
 from pathlib import Path
@@ -58,6 +61,7 @@ def test_find_missing_figures(tmp_path: Path) -> None:
         "% \\physfig{commented-out}{c}{l}\n",
         encoding="utf-8",
     )
+    (tex / "_template.tex").write_text("\\physfig{from-template}{c}{l}\n", encoding="utf-8")
     figures = tmp_path / "figures"
     figures.mkdir()
     (figures / "fig-one.pdf").write_bytes(b"%PDF")

@@ -50,3 +50,28 @@ def test_energy_comparison_orders_methods_as_documented() -> None:
     assert worst["euler"] > 1.0  # 100% 以上のエネルギー誤差
     assert worst["rk4"] < worst["verlet"] < 1e-3 < worst["euler"]
     assert all(err.shape == result.t.shape for err in result.relative_error.values())
+
+
+def test_period_ratio_curve_matches_textbook_table_and_series():
+    """教科書の表: T/T0 = 1.0174 (30°)、1.3729 (120°)。小振幅では 1 + θ0²/16 に近い。"""
+    from physlab.application.mechanics.pendulum import period_ratio_curve
+
+    curve = period_ratio_curve(np.array([10.0, 30.0, 60.0, 120.0, 179.0]))
+    assert curve.ratio_exact == pytest.approx([1.0019, 1.0174, 1.0732, 1.3729, 3.9011], abs=5e-5)
+    assert curve.ratio_first == pytest.approx([1.0019, 1.0171, 1.0685, 1.2742, 1.6100], abs=5e-5)
+    # 2 項まで取ると 60° で誤差 0.04% まで縮まる（教科書の演習の答え）
+    assert curve.ratio_second[2] == pytest.approx(1.0728, abs=5e-5)
+    assert np.all(np.diff(curve.ratio_exact) > 0)  # 振幅が大きいほど周期は伸びる
+
+
+def test_phase_portrait_energy_has_its_minimum_at_the_origin_and_separatrix_at_the_top():
+    from physlab.application.mechanics.pendulum import phase_portrait
+
+    portrait = phase_portrait(PendulumParams(), n=201)
+    i0 = int(np.argmin(np.abs(portrait.omega)))  # ω = 0 の行
+    j0 = int(np.argmin(np.abs(portrait.theta)))  # θ = 0 の列
+    assert portrait.energy[i0, j0] == pytest.approx(0.0, abs=1e-12)
+    assert portrait.energy.min() == pytest.approx(0.0, abs=1e-12)  # E ≥ 0（最小は釣り合いの位置）
+    # 真上 (θ=π, ω=0) のエネルギーが分離線の値 2gL
+    j_top = int(np.argmin(np.abs(portrait.theta - np.pi)))
+    assert portrait.energy[i0, j_top] == pytest.approx(portrait.separatrix_energy, rel=1e-9)

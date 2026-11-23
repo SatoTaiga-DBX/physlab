@@ -24,5 +24,7 @@ def setup_matplotlib() -> None:
             "axes.grid": True,
             "grid.alpha": 0.3,
             "figure.dpi": 100,
+            "mathtext.fontset": "cm",  # 数式は LaTeX と同じ書体にそろえる
+            "pdf.fonttype": 42,  # 教科書用の PDF: 文字を TrueType で埋め込む
         }
     )

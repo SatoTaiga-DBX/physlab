@@ -1,0 +1,87 @@
+% 新しい章の雛形。コピーして chapters/<部>/NN-名前.tex に置き、main.tex の \part の下に \input する。
+% 環境・マクロの一覧は docs/design/004-tex-textbook.md の「章の書き方」。
+% ファイル名が _ で始まるものは、ビルドと検査の対象外（この雛形が図の検査に引っかからないように）。
+\chapter{題}\label{ch:名前}
+\chapterinfo{★★☆}{約 X 分}{YYYY-MM-DD}
+\correspondsto{参考にする文献の節（なければこの行を消す）}
+
+\begin{objectives}
+\begin{enumerate}
+  \item （〜を導ける）
+  \item （〜を説明できる）
+  \item （〜をシミュレーションで確かめられる）
+\end{enumerate}
+\end{objectives}
+
+\paragraph{前提}
+先に読む章は \ref{ch:ode} のように鍵で参照する。必要な数学: （微積分、三角関数、…）。
+
+%% ================================================================
+\section{導入}\label{sec:名前-intro}
+
+何が不思議か。日常のどんな現象に対応するか。この章の問いを 1 つ立てる。
+
+\begin{intuition}
+この章の問い: …？
+\end{intuition}
+
+%% ================================================================
+\section{設定}\label{sec:名前-setup}
+
+登場する量、座標の取り方、単位（SI）。図があれば図。
+
+%% ================================================================
+\section{本論}\label{sec:名前-main}
+
+方程式を立てる → 解く → 結果の意味を読む。\textbf{途中式は省略しない}。数値は計算してから書く。
+
+\begin{defn}{名前}{鍵}
+定義を書く。参照は \ref{def:鍵}。
+\end{defn}
+
+\begin{equation}
+  \diff{y}{x}=\pdiff{f}{x}\label{eq:名前-a}
+\end{equation}
+
+%% ================================================================
+\section{シミュレーションで確かめる}\label{sec:名前-sim}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run <コマンド名>
+\end{terminal}
+動画のどこを見るか。
+\end{simbox}
+
+% 図はコマンドの figures() が outputs/figures/ に作る。名前に拡張子は付けない。
+% \physfig[0.95]{図の名前}{キャプション}{名前-fig}
+
+理論値と実測値の比較は、\textbf{実際に計算した値}を表にする。
+
+%% ================================================================
+\section{演習}\label{sec:名前-exercises}
+
+\begin{exercise}[基礎]{名前-a}
+問題文。
+\end{exercise}
+
+%% ================================================================
+\section{まとめ}\label{sec:名前-summary}
+
+\begin{summary}
+\begin{itemize}
+  \item 要点 1
+  \item 要点 2
+\end{itemize}
+\end{summary}
+
+\section{発展}\label{sec:名前-advanced}
+
+次に学ぶこと、関連する章・題材。
+
+%% ================================================================
+\section{演習の解答}\label{sec:名前-solutions}
+
+\begin{solution}{名前-a}
+解答。
+\end{solution}

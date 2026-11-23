@@ -19,7 +19,8 @@ def _read(path: Path) -> str:
 
 @pytest.fixture(scope="module")
 def sources() -> dict[Path, str]:
-    return {p: _read(p) for p in sorted(TEX_DIR.rglob("*.tex"))}
+    # 雛形（_template.tex）は本の一部ではないので対象外
+    return {p: _read(p) for p in sorted(TEX_DIR.rglob("*.tex")) if not p.name.startswith("_")}
 
 
 def test_main_inputs_exist(sources: dict[Path, str]) -> None:
@@ -47,6 +48,8 @@ def test_labels_are_unique(sources: dict[Path, str]) -> None:
 
 def test_cited_keys_are_in_bibliography(sources: dict[Path, str]) -> None:
     text = "\n".join(sources.values())
-    cited = {k.strip() for group in re.findall(r"\\cite\{([^}]+)\}", text) for k in group.split(",")}
+    cited = {
+        k.strip() for group in re.findall(r"\\cite\{([^}]+)\}", text) for k in group.split(",")
+    }
     defined = set(re.findall(r"\\bibitem\{([^}]+)\}", text))
     assert cited <= defined, f"参考文献に無い鍵: {sorted(cited - defined)}"

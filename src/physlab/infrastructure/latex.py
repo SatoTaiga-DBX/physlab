@@ -102,6 +102,8 @@ def referenced_figures(tex_dir: Path) -> set[str]:
     """TeX ソースが ``\\physfig`` / ``\\includegraphics`` で参照している図の名前。"""
     names: set[str] = set()
     for tex in tex_dir.rglob("*.tex"):
+        if tex.name.startswith("_"):  # 雛形（_template.tex）は対象外
+            continue
         text = re.sub(r"(?m)^\s*%.*$", "", tex.read_text(encoding="utf-8"))  # コメント行は除く
         names.update(_FIGURE_USE.findall(text))
     return names
@@ -130,7 +132,8 @@ def build_pdf(
 ) -> BuildResult:
     """``tex_dir/main`` をコンパイルして ``out_dir/<jobname>.pdf`` を作る。
 
-    目次・相互参照のため、ログが「もう一度実行せよ」と言わなくなるまで繰り返す（最大 ``max_passes``）。
+    目次・相互参照のため、ログが「もう一度実行せよ」と言わなくなるまで繰り返す
+    （最大 ``max_passes`` 回）。
     """
     exe = find_lualatex()
     if exe is None:

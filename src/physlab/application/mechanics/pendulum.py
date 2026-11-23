@@ -54,6 +54,63 @@ class EnergyComparison:
     relative_error: dict[str, Array]  # 手法名 -> (E - E0) / E0
 
 
+@dataclass(frozen=True)
+class PeriodCurve:
+    """初期角 θ0 に対する周期の比 T/T0（厳密値と、θ0 の冪展開による近似）。"""
+
+    theta0_deg: Array
+    ratio_exact: Array  # T/T0 = (2/π) K(sin(θ0/2))
+    ratio_first: Array  # 1 + θ0²/16
+    ratio_second: Array  # 1 + θ0²/16 + 11 θ0⁴/3072
+
+
+@dataclass(frozen=True)
+class PhasePortrait:
+    """位相平面 (θ, ω) 上の力学的エネルギー E/m の分布。等高線が運動の軌跡になる。"""
+
+    params: PendulumParams
+    theta: Array  # [rad]
+    omega: Array  # [rad/s]
+    energy: Array  # 形状 (len(omega), len(theta))
+    separatrix_energy: float  # 真上で静止する E/m = 2 g L（振動と回転の境目）
+
+
+def period_ratio_curve(theta0_deg: Array, length: float = 1.0, g: float = 9.81) -> PeriodCurve:
+    """各初期角で ``period_exact / period_small_angle`` を求める。"""
+    theta0_deg = np.asarray(theta0_deg, dtype=float)
+    ratio = np.array(
+        [
+            period_exact(PendulumParams(g=g, length=length, theta0=np.deg2rad(d)))
+            / period_small_angle(PendulumParams(g=g, length=length))
+            for d in theta0_deg
+        ]
+    )
+    th = np.deg2rad(theta0_deg)
+    return PeriodCurve(
+        theta0_deg=theta0_deg,
+        ratio_exact=ratio,
+        ratio_first=1.0 + th**2 / 16.0,
+        ratio_second=1.0 + th**2 / 16.0 + 11.0 * th**4 / 3072.0,
+    )
+
+
+def phase_portrait(
+    params: PendulumParams | None = None, n: int = 401, omega_max: float = 7.0
+) -> PhasePortrait:
+    """``θ ∈ [−2π, 2π]``、``ω ∈ [−ω_max, ω_max]`` の格子上で ``E/m`` を求める。"""
+    params = PendulumParams() if params is None else params
+    theta = np.linspace(-2.0 * np.pi, 2.0 * np.pi, n)
+    omega = np.linspace(-omega_max, omega_max, n)
+    grid_theta, grid_omega = np.meshgrid(theta, omega)
+    return PhasePortrait(
+        params=params,
+        theta=theta,
+        omega=omega,
+        energy=energy(grid_theta, grid_omega, params),
+        separatrix_energy=2.0 * params.g * params.length,
+    )
+
+
 def simulate(params: PendulumParams, duration: float, dt: float, method: str = "rk4") -> Trajectory:
     """``method``（euler / rk4 / verlet）で時間 ``duration`` まで積分する。"""
     t = np.arange(0.0, duration + dt / 2, dt)
