@@ -1,0 +1,313 @@
+\chapter{微分方程式と数値積分}\label{ch:ode}
+\chapterinfo{★★☆}{約 40 分}{2026-11-23}
+
+\begin{objectives}
+\begin{enumerate}
+  \item 運動方程式を「初期値問題 $\dot{\mathbf y}=\mathbf f(t,\mathbf y)$」の形に書き直せる。
+  \item 前進オイラー法・RK4・速度ベルレ法の更新式と、それぞれの\textbf{精度の次数}を説明できる。
+  \item 前進オイラー法が振動系でエネルギーを増やしてしまう理由を、式で示せる。
+  \item 状況に応じて積分法を選べる。
+\end{enumerate}
+\end{objectives}
+
+\paragraph{前提}
+微分・積分、テイラー展開の基礎。ニュートンの運動方程式 $m\ddot x=F$。
+
+%% ================================================================
+\section{導入：なぜ「数値的に」解くのか}\label{sec:ode-intro}
+
+物理法則の多くは「\textbf{いまの状態から、状態の変化率が決まる}」という形（微分方程式）で書かれる。
+ニュートンの運動方程式なら、位置と速度が分かれば加速度が決まり、わずかに先の位置と速度が決まる。
+これを繰り返せば未来が分かる。
+
+式が解析的に解ける例は意外に少ない。単振り子でさえ、厳密解は楕円関数になる
+（第\ref{ch:pendulum}章）。流体や波動になるとほぼ解けない。
+そこで\textbf{時間を小さな刻み $h$ に区切り、少しずつ先へ進む}。これが数値積分である。
+
+問いは 2 つ。\textbf{どれだけ正確か}（精度）と、\textbf{物理的な量が保たれるか}
+（エネルギー保存など）。この章では、その違いを 3 つの手法で見る。
+
+%% ================================================================
+\section{初期値問題}\label{sec:ivp}
+
+状態をベクトル $\mathbf y$ にまとめ、時間変化を
+\begin{equation}
+  \dot{\mathbf y}=\mathbf f(t,\mathbf y),\qquad \mathbf y(0)=\mathbf y_0
+  \label{eq:ivp}
+\end{equation}
+と書く。$\mathbf f$ は「この状態のとき、どちらへどれだけ変化するか」を返す関数である。
+
+\subsection*{高階の方程式は 1 階の連立にする}
+
+運動方程式は 2 階（$\ddot\theta$ を含む）。速度を別の変数にすれば 1 階になる。
+単振り子 $\ddot\theta=-(g/L)\sin\theta$ では、$\omega=\dot\theta$ として
+\begin{equation}
+  \mathbf y=\begin{pmatrix}\theta\\ \omega\end{pmatrix},\qquad
+  \mathbf f(t,\mathbf y)=\begin{pmatrix}\omega\\ -(g/L)\sin\theta\end{pmatrix}.
+\end{equation}
+コードでは \path{domain/mechanics/pendulum.py} の \code{deriv(params)} がこの $\mathbf f$ を返す。
+
+%% ================================================================
+\section{前進オイラー法}\label{sec:euler}
+
+テイラー展開
+\begin{equation}
+  \mathbf y(t+h)=\mathbf y(t)+h\,\dot{\mathbf y}(t)+\frac{h^2}{2}\ddot{\mathbf y}(t)+\cdots
+\end{equation}
+の第 2 項までを取り、$\dot{\mathbf y}=\mathbf f$ を使うと
+\begin{equation}
+  \mathbf y_{n+1}=\mathbf y_n+h\,\mathbf f(t_n,\mathbf y_n).
+  \label{eq:euler}
+\end{equation}
+「いまの傾きのまま、$h$ だけ直進する」更新である。
+
+\paragraph{誤差の見積り}
+1 ステップで捨てた項は $O(h^2)$（\textbf{局所誤差}）。時刻 $T$ までに $N=T/h$ ステップ積み重なるので、
+全体の誤差（\textbf{大域誤差}）は $N\cdot O(h^2)=O(h)$。これを\textbf{1 次精度}という。
+
+%% ================================================================
+\section{精度の次数と収束}\label{sec:order}
+
+$p$ 次精度の手法は、大域誤差が $h^p$ に比例する：
+\begin{equation}
+  \text{誤差}\approx C\,h^p
+  \quad\Longrightarrow\quad
+  \frac{\text{誤差}(h)}{\text{誤差}(h/2)}\approx 2^p.
+\end{equation}
+刻みを半分にして誤差が何分の 1 になるかを測れば、次数が分かる。
+本プロジェクトのテストは調和振動子 $\ddot y=-y$（解析解 $y=\cos t$）でこれを確かめている。
+
+\begin{table}[htbp]
+\centering
+\caption{刻みを半分にしたときの誤差比}\label{tab:order}
+\begin{tabular}{lcc}
+\toprule
+手法 & 理論の次数 & 誤差比（期待値） \\
+\midrule
+前進オイラー & 1 & 2 \\
+速度ベルレ   & 2 & 4 \\
+RK4          & 4 & 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%% ================================================================
+\section{ルンゲ＝クッタ法（RK4）}\label{sec:rk4}
+
+区間 $[t_n,t_n+h]$ の中で傾きを 4 回測り、重み付き平均で進む：
+\begin{equation}
+\begin{aligned}
+  \mathbf k_1&=\mathbf f(t_n,\ \mathbf y_n),\\
+  \mathbf k_2&=\mathbf f\!\left(t_n+\tfrac h2,\ \mathbf y_n+\tfrac h2\mathbf k_1\right),\\
+  \mathbf k_3&=\mathbf f\!\left(t_n+\tfrac h2,\ \mathbf y_n+\tfrac h2\mathbf k_2\right),\\
+  \mathbf k_4&=\mathbf f\!\left(t_n+h,\ \mathbf y_n+h\mathbf k_3\right),\\
+  \mathbf y_{n+1}&=\mathbf y_n+\tfrac h6\left(\mathbf k_1+2\mathbf k_2+2\mathbf k_3+\mathbf k_4\right).
+\end{aligned}
+\label{eq:rk4}
+\end{equation}
+
+\begin{intuition}
+区間の始点・中点（2 通りの見積り）・終点の傾きを $1:2:2:1$ の重みで平均する。
+傾きが $\mathbf y$ によらず $t$ だけで決まる場合は $\mathbf k_2=\mathbf k_3$ となり、
+重みは $1:4:1$、つまり数値積分のシンプソン則に一致する。
+\end{intuition}
+
+\textbf{4 次精度}。1 ステップで $\mathbf f$ を 4 回呼ぶので、1 ステップのコストは約 4 倍。
+それでも次数が高いので、同じ精度なら刻みを大きく取れて得になる
+（問~\ref{ex:ode-cost}）。
+
+%% ================================================================
+\section{速度ベルレ法}\label{sec:verlet}
+
+力が位置だけで決まる系 $\ddot{\mathbf q}=\mathbf a(t,\mathbf q)$（保存力）向け：
+\begin{equation}
+\begin{aligned}
+  \mathbf q_{n+1}&=\mathbf q_n+h\,\mathbf v_n+\tfrac{h^2}{2}\mathbf a_n,\\
+  \mathbf v_{n+1}&=\mathbf v_n+\tfrac h2\left(\mathbf a_n+\mathbf a_{n+1}\right),
+  \qquad \mathbf a_{n+1}=\mathbf a(t_{n+1},\mathbf q_{n+1}).
+\end{aligned}
+\label{eq:verlet}
+\end{equation}
+\textbf{2 次精度}だが、時間を反転しても同じ軌道を戻る\textbf{時間反転対称性}と、
+位相空間の面積を保つ\textbf{シンプレクティック性}を持つ。
+力が速度に依存する場合（摩擦、磁場中の運動）はそのままでは使えない。
+
+%% ================================================================
+\section{エネルギーはなぜずれるのか：調和振動子で厳密に計算する}\label{sec:ode-energy}
+
+最も簡単な振動 $\ddot q=-q$（$v=\dot q$）。エネルギーは $E=\tfrac12(q^2+v^2)$ で保存される。
+前進オイラー法の更新式は
+\begin{equation}
+  q_{n+1}=q_n+h v_n,\qquad v_{n+1}=v_n-h q_n .
+\end{equation}
+両辺を 2 乗して足すと、交差項 $\pm2h\,q_nv_n$ が打ち消し合い、
+\begin{equation}
+  q_{n+1}^2+v_{n+1}^2=(1+h^2)\,(q_n^2+v_n^2).
+  \label{eq:euler-factor}
+\end{equation}
+つまり\textbf{1 ステップごとにエネルギーがちょうど $(1+h^2)$ 倍}になる。
+$n=t/h$ ステップ後は
+\begin{equation}
+  \frac{E(t)}{E(0)}=(1+h^2)^{t/h}\;\approx\;\ee^{\,h\,t}.
+  \label{eq:euler-growth}
+\end{equation}
+刻みを小さくすれば増え方は遅くなる（$h$ に比例する）が、ゼロにはならない。
+\textbf{前進オイラー法は振動系のエネルギーを必ず増やす}。
+
+\begin{table}[htbp]
+\centering
+\caption{前進オイラー法による調和振動子のエネルギー倍率（式~\eqref{eq:euler-growth} の計算値）}
+\label{tab:euler-growth}
+\begin{tabular}{lc}
+\toprule
+条件 & $E(t)/E(0)$ \\
+\midrule
+$h=0.01,\ t=50$  & 1.649 \\
+$h=0.01,\ t=100$ & 2.718 \\
+$h=0.1,\ t=100$  & $2.096\times10^{4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+一方、速度ベルレ法は、真のエネルギーは保存しないが、\textbf{わずかに修飾したエネルギー}
+（影のハミルトニアン）をほぼ保存することが知られている（ここでは結果のみ紹介し、証明は割愛）。
+そのため真のエネルギーとの差は一定範囲で振動するだけで、\textbf{ドリフトしない}。
+RK4 は精度は高いが、この性質は無く、誤差は一方向にゆっくり蓄積する。
+
+%% ================================================================
+\section{手法の選び方}\label{sec:choice}
+
+\begin{table}[htbp]
+\centering
+\caption{積分法の選び方}\label{tab:choice}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{0.34\linewidth}lX}
+\toprule
+状況 & 第一候補 & 理由 \\
+\midrule
+短時間・高精度・速度に依存する力がある & RK4 & 高次精度、どんな $\mathbf f$ にも使える \\
+保存力のみ・長時間（軌道、位相が大事） & 速度ベルレ & エネルギーがドリフトしない \\
+手法の違いを学ぶための対照 & 前進オイラー & 最も単純。振動系には実用にならない \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ================================================================
+\section{シミュレーションで確かめる}\label{sec:sim-ode}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run pendulum
+\end{terminal}
+\end{simbox}
+
+出力される \path{outputs/mechanics/pendulum_energy_drift.png} は、単振り子（初期角 $\ang{120}$、
+$h=\qty{0.01}{s}$、\qty{100}{s}）で 3 手法のエネルギー誤差を比べた図である。
+
+\begin{table}[htbp]
+\centering
+\caption{3 手法の最大の相対エネルギー誤差（実測）}\label{tab:energy-measured}
+\begin{tabular}{lcl}
+\toprule
+手法 & 最大の相対エネルギー誤差 & 振る舞い \\
+\midrule
+前進オイラー & 3.25（約 325\%） & 増え続ける \\
+RK4          & $7.1\times10^{-8}$ & ごく緩やかにドリフト \\
+速度ベルレ   & $1.8\times10^{-4}$ & 有界に振動（ドリフトなし） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+調和振動子の式（\ref{sec:ode-energy}節）で $h=0.01$、\qty{100}{s} なら倍率は 2.72。
+単振り子（$\ang{120}$）の実測は約 4.2 倍で、式とは一致しない。
+これは非線形系だからである（\ref{sec:ode-energy}節の導出は調和振動子に限った厳密計算）。
+\textbf{定性的な増え方は同じ}で、この単振り子では実測 $+321\%$ の増加になる。
+
+\paragraph{コードとの対応}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+種類 & 場所 \\
+\midrule
+積分器 & \path{src/physlab/numerics/integrators.py} \\
+単振り子の $\mathbf f$ & \path{src/physlab/domain/mechanics/pendulum.py}（\code{deriv}, \code{accel}） \\
+手法の比較 & \path{src/physlab/application/mechanics/pendulum.py}（\code{compare_energy_drift}） \\
+テスト & \path{tests/numerics/test_integrators.py}（収束次数、ベルレの有界性、オイラーの $(1+h^2)$ 倍） \\
+設計書・知見 & \path{docs/design/002-pendulum.md}, \path{docs/knowledge/numerical-integration.md} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%% ================================================================
+\section{演習}\label{sec:ode-exercises}
+
+\begin{exercise}[基礎]{ode-euler-ho}
+前進オイラー法で調和振動子を $h=0.1$、$t=100$ まで解く。エネルギーは何倍になるか。
+\end{exercise}
+
+\begin{exercise}[基礎]{ode-order}
+1 次精度の手法と 4 次精度の手法で、刻みを $1/10$ にすると誤差はそれぞれ何分の 1 になるか。
+\end{exercise}
+
+\begin{exercise}[応用]{ode-cost}
+前進オイラー法（$h=0.01$）と同じ回数だけ $\mathbf f$ を評価するには、RK4 ではどんな刻みを使えばよいか。
+誤差が $C h^p$（$C$ は同程度）だとして、どちらがどれだけ小さいか比べよ。
+\end{exercise}
+
+\begin{exercise}[予想してから実行]{ode-predict}
+調和振動子を前進オイラー法で $h=0.001$、$t=100$ まで解くとエネルギーは何倍か。式で予想せよ。
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{ode-sim}
+\code{uv run physlab run pendulum --energy-dt 0.001} を実行し、オイラー法の誤差の増え方が
+\code{--energy-dt 0.01}（既定）のときより小さくなることを図で確認せよ。
+\end{exercise}
+
+%% ================================================================
+\section{まとめ}\label{sec:ode-summary}
+
+\begin{summary}
+\begin{itemize}
+  \item 物理の運動方程式は $\dot{\mathbf y}=\mathbf f(t,\mathbf y)$ に直して、刻み $h$ で少しずつ進める。
+  \item $p$ 次精度なら誤差は $h^p$。刻みを半分にして誤差比を測れば次数が分かる。
+  \item 前進オイラー法は振動系でエネルギーを必ず増やす（調和振動子では毎ステップ $(1+h^2)$ 倍）。
+  \item RK4 は高精度、速度ベルレはエネルギーがドリフトしない。目的に応じて選ぶ。
+\end{itemize}
+\end{summary}
+
+\section{発展}\label{sec:ode-advanced}
+\begin{itemize}
+  \item 影のハミルトニアン（後退誤差解析）：ベルレ法がなぜドリフトしないかの理論的な説明\cite{hairer}。
+  \item 適応刻み幅（\code{scipy.integrate.solve_ivp}）：誤差を見ながら刻みを自動調整する。
+  \item 剛直な（stiff）方程式と陰解法：拡散方程式など、流体の章で必要になる。
+\end{itemize}
+
+%% ================================================================
+\section{演習の解答}\label{sec:ode-solutions}
+
+\begin{solution}{ode-euler-ho}
+1 ステップで $(1+h^2)=1.01$ 倍。ステップ数は $100/0.1=1000$。
+$1.01^{1000}=\ee^{1000\ln1.01}=\ee^{9.95}\approx2.1\times10^{4}$ 倍。
+実用にならない（表~\ref{tab:euler-growth} と一致）。
+\end{solution}
+
+\begin{solution}{ode-order}
+誤差 $\propto h^p$ なので、1 次は $1/10$、4 次は $1/10^4$。
+\end{solution}
+
+\begin{solution}{ode-cost}
+オイラーは 1 ステップで $\mathbf f$ を 1 回。単位時間あたり $1/0.01=100$ 回。
+RK4 は 1 ステップで 4 回なので、$h=0.04$ なら単位時間あたり $(1/0.04)\times4=100$ 回で同じ。
+誤差はオイラーが $\propto0.01$、RK4 が $\propto0.04^4=2.6\times10^{-6}$。
+$C$ が同程度なら RK4 は約 4000 分の 1。次数が高い手法は、計算量あたりで圧倒的に得になる。
+\end{solution}
+
+\begin{solution}{ode-predict}
+$(1+10^{-6})^{10^5}\approx\ee^{0.1}\approx1.105$。$h=0.01$ の 2.72 倍に比べ、増え方は約 $1/10$
+（指数 $ht$ が $h$ に比例するため）。
+\end{solution}
+
+\begin{solution}{ode-sim}
+実測値: オイラー法の最終エネルギー誤差は、$h=0.01$ で $+3.21$（$+321\%$）、$h=0.001$ で $+0.355$（$+35\%$）。
+刻みを $1/10$ にして約 $1/9$ になった。1 次精度の予想（$1/10$）とほぼ合う
+（非線形なので厳密には $1/10$ にならない）。
+\end{solution}

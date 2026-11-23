@@ -1,0 +1,150 @@
+% physlab.sty -- physlab 教科書の共通スタイル（LuaLaTeX + LuaTeX-ja 専用）
+%
+% 設計: docs/design/004-tex-textbook.md
+% 使い方: main.tex の \usepackage{physlab}。章ファイルでは下記の環境・マクロを使う。
+%
+%   \chapterinfo{難易度}{所要時間}{更新日}   章の見出し直下の情報
+%   \correspondsto{...}                      対応する文献の節
+%   \begin{objectives}...\end{objectives}    学習目標
+%   \begin{defn}{題}{ラベル}                 定義   (\ref{def:ラベル})
+%   \begin{principle}{題}{ラベル}            原理   (\ref{prin:ラベル})
+%   \begin{result}{題}{ラベル}               結果   (\ref{res:ラベル})
+%   \begin{intuition}...  \begin{note}...  \begin{simbox}...   番号なしの囲み
+%   \begin{exercise}[種別]{鍵} ... \end{exercise}   問題。章末の solution{鍵} と相互にリンクする
+%   \begin{solution}{鍵} ... \end{solution}          解答
+%   \physfig[幅]{ファイル名}{キャプション}{ラベル}   outputs/figures/ の図を貼る
+%   \code{..}  \path{..}                      コード・ファイルパス
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{physlab}[2026/11/23 physlab textbook style]
+
+%% ---------------------------------------------------------------- 日本語・版面
+\RequirePackage[haranoaji]{luatexja-preset}
+\RequirePackage[a4paper,left=25mm,right=25mm,top=28mm,bottom=28mm,
+  headheight=18pt,headsep=8mm,footskip=14mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt,parsep=0pt}
+
+%% ---------------------------------------------------------------- 数式
+\RequirePackage{amsmath,amssymb,mathtools,bm}
+\RequirePackage{siunitx}
+\sisetup{per-mode=symbol,range-phrase={\text{--}},exponent-product={\cdot}}
+
+\newcommand{\dd}{\mathrm{d}}                          % 微分の d
+\newcommand{\diff}[2]{\frac{\dd #1}{\dd #2}}          % \diff{y}{x} = dy/dx
+\newcommand{\pdiff}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\abs}[1]{\left\lvert #1\right\rvert}
+\newcommand{\Lagr}{\mathcal{L}}                       % ラグランジアン
+\newcommand{\ee}{\mathrm{e}}
+\DeclareMathOperator{\sgn}{sgn}
+\numberwithin{equation}{chapter}
+
+%% ---------------------------------------------------------------- 図・表
+\RequirePackage{graphicx,booktabs,tabularx,array,multirow}
+% L: 折り返せる左揃えの伸縮列（長いパスや説明文の列に使う）
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\RequirePackage[font=small,labelfont=bf,labelsep=quad]{caption}
+\providecommand{\physlabfigdir}{../../../outputs/figures/}   % ビルドコマンドが上書きする
+\graphicspath{{\physlabfigdir}}
+\newcommand{\physfig}[4][0.95]{%
+  \begin{figure}[htbp]\centering
+    \includegraphics[width=#1\linewidth]{#2}%
+    \caption{#3}\label{fig:#4}%
+  \end{figure}}
+
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,calc,angles,quotes,decorations.markings,patterns,positioning}
+
+%% ---------------------------------------------------------------- コード
+\RequirePackage{listings}
+\lstset{%
+  basicstyle=\ttfamily\small,columns=fullflexible,keepspaces=true,
+  breaklines=true,breakatwhitespace=false,
+  frame=single,rulecolor=\color{black!20},backgroundcolor=\color{black!3},
+  xleftmargin=0.5em,xrightmargin=0.5em,aboveskip=0.8em,belowskip=0.6em,
+  showstringspaces=false,
+}
+\lstnewenvironment{terminal}{\lstset{language={}}}{}      % コマンドの例
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}            % 短い識別子
+% \path{..}: ファイルパス（スラッシュで折り返せる）。url パッケージの \path をそのまま使う
+\RequirePackage{url}
+\urlstyle{tt}
+
+%% ---------------------------------------------------------------- 囲み
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins,breakable,theorems}
+\definecolor{plblue}{HTML}{1F5FA8}
+\definecolor{plred}{HTML}{B3402A}
+\definecolor{plgreen}{HTML}{2F7D4F}
+\definecolor{plorange}{HTML}{B8741A}
+\definecolor{plteal}{HTML}{1E7A7A}
+\definecolor{plgray}{HTML}{555555}
+
+% physbox=<色名>: 左に太い線のある囲み。色を引数に取る（スタイル内で色を使うため）
+\tcbset{physbox/.style={%
+  enhanced,breakable,sharp corners,boxrule=0pt,frame hidden,
+  colback=#1!6,colframe=#1,coltitle=#1,
+  borderline west={2.5pt}{0pt}{#1},
+  left=8pt,right=8pt,top=5pt,bottom=5pt,before skip=10pt,after skip=10pt,
+  fonttitle=\headfont\bfseries\small,attach title to upper={\quad},
+  title filled=false}}
+
+% 番号付き（章ごと）: \begin{defn}{題}{ラベル}
+\newtcbtheorem[number within=chapter]{defn}{定義}{physbox=plblue}{def}
+\newtcbtheorem[number within=chapter]{principle}{原理}{physbox=plred}{prin}
+\newtcbtheorem[number within=chapter]{result}{結果}{physbox=plgreen}{res}
+
+% 番号なし
+\newtcolorbox{intuition}{physbox=plorange,title={イメージ}}
+\newtcolorbox{note}{physbox=plgray,title={注}}
+\newtcolorbox{simbox}{physbox=plteal,title={シミュレーションで確かめる}}
+\newtcolorbox{objectives}{physbox=plgray,title={この章で学ぶこと}}
+\newtcolorbox{summary}{physbox=plblue}   % 見出しは \section{まとめ} が担う
+
+%% ---------------------------------------------------------------- 章の体裁
+\newcommand{\chapterinfo}[3]{%
+  \noindent{\small\color{plgray}難易度 #1\quad\textbar\quad 所要時間 #2\quad\textbar\quad 更新日 #3}\par\medskip}
+\newcommand{\correspondsto}[1]{\par\noindent{\small\color{plgray}対応: #1}\par\smallskip}
+
+%% ---------------------------------------------------------------- 問題と解答（相互リンク）
+% 問題は本文中、解答は章末の「演習の解答」節に置く。鍵（key）で結ぶ:
+%   問題 → 解答: 問題の末尾の「解答は p.N →」
+%   解答 → 問題: 解答の見出し「問 N の解答」
+\newcounter{exercise}[chapter]
+\renewcommand{\theexercise}{\thechapter.\arabic{exercise}}
+\newenvironment{exercise}[2][基礎]{%
+  \def\physlab@exkey{#2}%
+  \par\medskip\refstepcounter{exercise}\label{ex:#2}%
+  \noindent{\headfont\bfseries 問\,\theexercise}\,（#1）\quad\ignorespaces
+}{%
+  \par\nopagebreak\noindent\hfill\hyperref[sol:\physlab@exkey]{\small 解答は p.\pageref*{sol:\physlab@exkey} $\rightarrow$}%
+  \par\medskip
+}
+\newenvironment{solution}[1]{%
+  \par\medskip\phantomsection\label{sol:#1}%
+  \begin{tcolorbox}[enhanced,breakable,sharp corners,boxrule=0pt,frame hidden,
+    borderline west={2pt}{0pt}{black!35},colback=black!3,left=8pt,right=8pt,top=4pt,bottom=4pt,
+    before skip=6pt,after skip=6pt]
+  \noindent\hyperref[ex:#1]{\textbf{\headfont 問\,\ref*{ex:#1} の解答}}\quad\ignorespaces
+}{%
+  \end{tcolorbox}%
+}
+
+%% ---------------------------------------------------------------- ヘッダ・フッタ
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\leftmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\chaptermark}[1]{\markboth{第\thechapter 章\hspace{1em}#1}{}}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}\renewcommand{\headrulewidth}{0pt}}
+% ltjsbook の章扉は、ヘッダが空でないと「上にページ番号」の型を選ぶ。常に plain（下中央）にする
+\renewcommand{\plainifnotempty}{\thispagestyle{plain}}
+
+%% ---------------------------------------------------------------- リンク（最後に読み込む）
+\RequirePackage[pdfencoding=auto,colorlinks=true,linkcolor=plblue,citecolor=plgreen,
+  urlcolor=plblue,bookmarksnumbered=true]{hyperref}
+\RequirePackage{bookmark}
+
+\endinput

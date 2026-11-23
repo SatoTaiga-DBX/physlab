@@ -1,0 +1,31 @@
+% physlab 教科書の本体。章は chapters/ 以下に置き、ここで並べる。
+% ビルド: uv run physlab run textbook    （詳細は docs/design/004-tex-textbook.md）
+\documentclass[a4paper,11pt,oneside]{ltjsbook}
+\usepackage{physlab}
+
+\hypersetup{pdftitle={physlab 物理学び直しノート},pdfauthor={physlab}}
+\title{physlab\\[0.4em]物理学び直しノート}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+
+\part{準備：数値で解く}
+\input{chapters/00-foundations/01-ode-and-numerical-integration}
+
+\part{力学の入口}
+\input{chapters/01-mechanics/01-pendulum}
+
+\appendix
+\input{chapters/appendix/symbols}
+
+\backmatter
+\input{chapters/bibliography}
+
+\end{document}

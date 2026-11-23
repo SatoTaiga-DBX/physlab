@@ -1,0 +1,347 @@
+\chapter{単振り子}\label{ch:pendulum}
+\chapterinfo{★★☆}{約 50 分}{2026-11-23}
+
+\begin{objectives}
+\begin{enumerate}
+  \item 単振り子の運動方程式 $\ddot\theta=-(g/L)\sin\theta$ を導ける。
+  \item 小角近似で単振動になること、周期が振幅によらない（等時性）ことを説明できる。
+  \item エネルギー保存から、厳密な周期が楕円積分で書けることを導ける。
+  \item 振幅が大きいと周期が伸びる理由と、その大きさを見積もれる。
+  \item 位相空間で単振り子の運動を読める。
+\end{enumerate}
+\end{objectives}
+
+\paragraph{前提}
+微積分、三角関数、ニュートンの運動方程式。数値積分（\ref{sec:pend-phase}節）は
+第\ref{ch:ode}章を先に読むと分かりやすい。
+
+%% ================================================================
+\section{導入}\label{sec:pend-intro}
+
+ガリレオはピサの大聖堂のランプの揺れから、「振れ幅が変わっても周期は同じ」と気づいたと伝えられる。
+これは\textbf{近似として}正しい。振れ幅が小さければ周期はほとんど変わらないが、
+大きく振らせると、はっきり遅くなる。
+
+\begin{intuition}
+この章の問い: \textbf{振れ幅が大きくなると、周期はどれだけ、なぜ伸びるのか？}
+\end{intuition}
+
+%% ================================================================
+\section{設定}\label{sec:pend-setup}
+
+質量 $m$ の質点を、長さ $L$ の軽くて伸びない棒で吊るす。支点まわりに摩擦はなく、
+重力加速度は $g$。鉛直下向きからの角度を $\theta$（反時計回りを正）とする。質点の位置は
+\begin{equation}
+  (x,y)=(L\sin\theta,\ -L\cos\theta).
+\end{equation}
+自由度は $\theta$ の 1 つである。
+
+%% ================================================================
+\section{運動方程式}\label{sec:pend-eom}
+
+質点にはたらく力は重力 $mg$（鉛直下向き）と棒の張力 $S$（棒に沿って支点向き）。
+重力を、棒の\textbf{接線方向}（$\theta$ が増える向き）と\textbf{棒に沿った方向}に分ける。
+\begin{itemize}
+  \item 接線方向の成分: $-mg\sin\theta$（$\theta$ を減らす向き＝復元力）
+  \item 棒に沿った成分: $mg\cos\theta$（張力と釣り合う側）
+\end{itemize}
+質点は半径 $L$ の円周上を動くので、接線方向の加速度は $L\ddot\theta$。
+接線方向のニュートンの運動方程式は
+\begin{equation}
+  mL\ddot\theta=-mg\sin\theta
+  \quad\Longrightarrow\quad
+  \boxed{\ddot\theta=-\frac gL\sin\theta}.
+  \label{eq:pend-eom}
+\end{equation}
+質量 $m$ が消えた。\textbf{周期は質量によらない}。
+
+棒に沿った方向は、向心加速度 $L\dot\theta^2$ を与える：$S-mg\cos\theta=mL\dot\theta^2$。
+つまり張力は $S=m(g\cos\theta+L\dot\theta^2)$。運動方程式には効かない
+（棒が伸びないという拘束で決まる）。
+
+%% ================================================================
+\section{小角近似と単振動}\label{sec:pend-small}
+
+$\abs{\theta}\ll1$ では $\sin\theta=\theta-\theta^3/6+\cdots\approx\theta$。方程式は
+\begin{equation}
+  \ddot\theta=-\omega_0^2\,\theta,\qquad \omega_0=\sqrt{g/L}
+  \label{eq:pend-small}
+\end{equation}
+となり、一般解は $\theta(t)=A\cos\omega_0t+B\sin\omega_0t$。
+静かに放した場合（$\theta(0)=\theta_0$、$\dot\theta(0)=0$）は
+\begin{equation}
+  \theta(t)=\theta_0\cos\omega_0t,\qquad T_0=\frac{2\pi}{\omega_0}=2\pi\sqrt{\frac Lg}.
+\end{equation}
+周期 $T_0$ は振幅 $\theta_0$ を含まない。これが\textbf{等時性}である。
+$L=\qty{1}{m}$ なら $T_0=\qty{2.0061}{s}$。
+
+\subsection*{近似がどれだけ粗いか}
+
+小角近似は、復元力 $\sin\theta$ を $\theta$ で置き換えている。
+$\theta_0=\ang{120}=\qty{2.094}{rad}$ では $\sin\theta_0=0.866$ だが $\theta_0=2.094$ で、
+\textbf{近似は復元力を 2.4 倍に過大評価}する。
+本当の振り子は近似より弱い力で引き戻されるので、\textbf{ゆっくり}動く＝周期が伸びる。
+動画で、橙（近似）が青（厳密）より先に一周するのはこのためである。
+
+%% ================================================================
+\section{エネルギー保存}\label{sec:pend-energy}
+
+運動方程式に $\dot\theta$ を掛けると
+\begin{equation}
+  \dot\theta\,\ddot\theta=-\frac gL\sin\theta\;\dot\theta
+  \quad\Longleftrightarrow\quad
+  \diff{}{t}\left[\tfrac12\dot\theta^2-\frac gL\cos\theta\right]=0.
+\end{equation}
+$mL^2$ を掛けて整えると、保存量（力学的エネルギー、最下点を基準）が得られる：
+\begin{equation}
+  E=\tfrac12mL^2\dot\theta^2+mgL(1-\cos\theta)=\text{一定}.
+  \label{eq:pend-energy}
+\end{equation}
+静かに放した場合 $E=mgL(1-\cos\theta_0)$ なので、角速度は
+\begin{equation}
+  \dot\theta^2=\frac{2g}{L}\left(\cos\theta-\cos\theta_0\right).
+  \label{eq:pend-omega}
+\end{equation}
+最下点（$\theta=0$）の速さは $v=L\dot\theta=\sqrt{2gL(1-\cos\theta_0)}$。
+
+%% ================================================================
+\section{厳密な周期}\label{sec:pend-period}
+
+式~\eqref{eq:pend-omega} を $\dot\theta=d\theta/dt$ とみて変数分離する。
+振り子は $\theta=0\to\theta_0$ に $T/4$ かけて動くから
+\begin{equation}
+  \frac T4=\int_0^{\theta_0}\frac{d\theta}{\dot\theta}
+  =\sqrt{\frac{L}{2g}}\int_0^{\theta_0}\frac{d\theta}{\sqrt{\cos\theta-\cos\theta_0}}.
+\end{equation}
+倍角の公式 $\cos\theta=1-2\sin^2(\theta/2)$ で書き換えると
+$\cos\theta-\cos\theta_0=2\left[\sin^2(\theta_0/2)-\sin^2(\theta/2)\right]$。
+$k=\sin(\theta_0/2)$ とおき、置換 $\sin(\theta/2)=k\sin\varphi$（$\varphi:0\to\pi/2$）を行う。
+\begin{itemize}
+  \item 根号の中: $\cos\theta-\cos\theta_0=2k^2\cos^2\varphi$
+  \item 微分: $\tfrac12\cos(\theta/2)\,d\theta=k\cos\varphi\,d\varphi$、
+    かつ $\cos(\theta/2)=\sqrt{1-k^2\sin^2\varphi}$ なので
+    $d\theta=\dfrac{2k\cos\varphi}{\sqrt{1-k^2\sin^2\varphi}}\,d\varphi$
+\end{itemize}
+よって被積分関数は
+$\dfrac{d\theta}{\sqrt{\cos\theta-\cos\theta_0}}=\dfrac{\sqrt2\,d\varphi}{\sqrt{1-k^2\sin^2\varphi}}$。
+$\cos\varphi$ が約分されて、
+\begin{result}{単振り子の厳密な周期}{pend-period}
+\begin{equation}
+  T=4\sqrt{\frac Lg}\;K(k)=\frac{4}{\omega_0}K\!\left(\sin\frac{\theta_0}{2}\right),
+  \qquad
+  K(k)=\int_0^{\pi/2}\frac{d\varphi}{\sqrt{1-k^2\sin^2\varphi}}.
+  \label{eq:pend-period}
+\end{equation}
+\end{result}
+$K(k)$ は\textbf{第 1 種完全楕円積分}。$k\to0$ で $K\to\pi/2$ となり、
+$T\to2\pi/\omega_0=T_0$（小角近似）に戻る。
+（SciPy の \code{ellipk(m)} は $m=k^2$ を引数に取る。コードの \code{period_exact} はこの式そのもの。）
+
+%% ================================================================
+\section{周期は振幅でどう変わるか}\label{sec:pend-amplitude}
+
+$K(k)$ を $k$ で展開すると $K=\tfrac\pi2\left[1+\tfrac14k^2+\tfrac9{64}k^4+\cdots\right]$。
+$k^2=\sin^2(\theta_0/2)\approx\theta_0^2/4$ を使うと
+\begin{equation}
+  \frac{T}{T_0}=1+\frac{\theta_0^2}{16}+\frac{11\,\theta_0^4}{3072}+\cdots
+  \label{eq:pend-expand}
+\end{equation}
+（$\theta_0$ は rad）。振幅が小さいうちは\textbf{周期の伸びは振幅の 2 乗に比例}する。
+
+計算値（$T/T_0$ の厳密値と、第 1 項まで取った近似 $1+\theta_0^2/16$）を表~\ref{tab:pend-ratio} に示す。
+
+\begin{table}[htbp]
+\centering
+\caption{周期の比 $T/T_0$ の厳密値と近似}\label{tab:pend-ratio}
+\begin{tabular}{rccc}
+\toprule
+初期角 $\theta_0$ & $T/T_0$（厳密） & $1+\theta_0^2/16$ & 近似の誤差 \\
+\midrule
+$\ang{10}$  & 1.0019 & 1.0019 & $0.00\%$ \\
+$\ang{30}$  & 1.0174 & 1.0171 & $-0.03\%$ \\
+$\ang{60}$  & 1.0732 & 1.0685 & $-0.43\%$ \\
+$\ang{90}$  & 1.1803 & 1.1542 & $-2.21\%$ \\
+$\ang{120}$ & 1.3729 & 1.2742 & $-7.19\%$ \\
+$\ang{150}$ & 1.7622 & 1.4284 & $-18.94\%$ \\
+$\ang{170}$ & 2.4394 & 1.5502 & $-36.45\%$ \\
+$\ang{175}$ & 2.8777 & 1.5831 & $-44.99\%$ \\
+$\ang{179}$ & 3.9011 & 1.6100 & $-58.73\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item $\ang{30}$ まで振っても周期の伸びは $1.7\%$ しかない。ガリレオの観察は実用上正しい。
+  \item $\ang{120}$ で $37\%$ 伸びる。第 1 項だけの近似は $7\%$ ずれる。
+  \item $\theta_0\to\ang{180}$（真上）で周期は\textbf{発散}する。$k\to1$ で
+    $K(k)\simeq\ln\dfrac{4}{\sqrt{1-k^2}}$ なので
+    \begin{equation}
+      T\simeq\frac{4}{\omega_0}\ln\frac{4}{\cos(\theta_0/2)}\qquad(\theta_0\to\pi).
+    \end{equation}
+    $\ang{179}$ で式の値 $T/T_0=\dfrac2\pi\ln\dfrac{4}{\cos\ang{89.5}}=3.901$ は表の厳密値と一致する。
+    物理的には、真上は不安定な釣り合い点で、そこへ向かう振り子は頂点付近でほとんど止まり、
+    通過に長い時間がかかる。
+\end{itemize}
+
+%% ================================================================
+\section{位相空間で見る}\label{sec:pend-phase}
+
+位置 $\theta$ と速度 $\omega=\dot\theta$ を軸にした平面（位相空間）では、
+エネルギー保存~\eqref{eq:pend-omega} より運動は\textbf{等エネルギー曲線}の上を動く：
+\begin{equation}
+  \omega=\pm\frac1L\sqrt{2\left[E/m-gL(1-\cos\theta)\right]}.
+\end{equation}
+\begin{itemize}
+  \item 小さい振幅: ほぼ\textbf{楕円}（単振動）。
+  \item 振幅が大きくなる: 楕円が $\theta$ 方向に引き伸ばされ、「魚の目」の形になる。
+  \item $E/m=2gL$（真上で静止）: \textbf{分離線}（セパラトリクス）。これより小さい $E$ は振動、
+    大きい $E$ は回転運動。本章は振動（$\theta_0<\pi$）だけを扱う。
+\end{itemize}
+閉じた曲線＝周期運動。数値解法がうまいかどうかは、\textbf{この閉曲線から外れないか}で見られる。
+前進オイラー法は外へ螺旋状に広がり（エネルギーが増える）、速度ベルレ法は閉曲線の近くに留まる。
+これが第\ref{ch:ode}章の話である。
+
+%% ================================================================
+\section{シミュレーションで確かめる}\label{sec:pend-sim}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run pendulum                      # 初期角 120°（既定）
+uv run physlab run pendulum --theta0-deg 10      # 小角: 近似とほぼ重なる
+uv run physlab run pendulum --theta0-deg 170     # 大振幅: 周期が約 2.4 倍
+\end{terminal}
+\end{simbox}
+
+出力は \path{outputs/mechanics/pendulum.mp4}。見るところ:
+\begin{itemize}
+  \item 左: 厳密解（青）と小角近似（橙）の 2 つの振り子。初めは重なっていて、だんだん位相がずれる。
+  \item 右: $\theta(t)$。橙のほうが山の間隔が短い。タイトルに 2 つの周期が出る。
+\end{itemize}
+
+初期角 $\ang{120}$、$L=\qty{1}{m}$ での値:
+\begin{center}
+\begin{tabular}{lcl}
+\toprule
+量 & 理論値 & 備考 \\
+\midrule
+小角近似の周期 $T_0$ & \qty{2.0061}{s} & $2\pi\sqrt{L/g}$ \\
+厳密な周期 $T$ & \qty{2.7541}{s} & $\tfrac{4}{\omega_0}K(\sin\ang{60})$、$T/T_0=1.3729$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+数値解（RK4、$h=\qty{1}{ms}$）から求めた周期は、$\theta_0=10,60,120,170^\circ$ のすべてで
+厳密な周期と相対誤差 $10^{-4}$ 以内で一致する
+（\path{tests/application/mechanics/test_pendulum.py}）。
+つまり「楕円積分の公式」と「微分方程式を数値で解いた結果」は、独立に同じ答えに到達する。
+
+\paragraph{コードとの対応}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+種類 & 場所 \\
+\midrule
+設計書 & \path{docs/design/002-pendulum.md} \\
+物理（domain） & \path{src/physlab/domain/mechanics/pendulum.py}（\code{deriv}, \code{energy}, \code{period_exact}, \code{small_angle_solution}） \\
+ユースケース & \path{src/physlab/application/mechanics/pendulum.py}（\code{simulate}, \code{compare_with_small_angle}） \\
+描画 & \path{src/physlab/infrastructure/rendering/mechanics/pendulum.py} \\
+テスト & \path{tests/domain/mechanics/test_pendulum.py}, \path{tests/application/mechanics/test_pendulum.py} \\
+知見 & \path{docs/knowledge/numerical-integration.md}, \path{docs/knowledge/visualization.md} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%% ================================================================
+\section{演習}\label{sec:pend-exercises}
+
+\begin{exercise}[基礎]{pend-t0}
+長さ $L=\qty{0.25}{m}$ の振り子の、小角での周期 $T_0$ を求めよ。
+\end{exercise}
+
+\begin{exercise}[基礎]{pend-speed}
+$\theta_0=\ang{120}$、$L=\qty{1}{m}$ で放した振り子の、最下点での速さを求めよ。
+\end{exercise}
+
+\begin{exercise}[応用]{pend-approx}
+$\theta_0=\ang{60}$ で、近似式 $T\approx T_0(1+\theta_0^2/16)$ の値と厳密値を比べよ。
+2 項目 $\tfrac{11}{3072}\theta_0^4$ まで入れるとどうなるか。
+\end{exercise}
+
+\begin{exercise}[応用]{pend-diverge}
+$\theta_0\to\pi$ で周期が発散する理由を、(a) 物理的に (b) 式の上で説明せよ。
+\end{exercise}
+
+\begin{exercise}[応用]{pend-initvel}
+初期角速度が 0 でないとき（$\dot\theta(0)=\omega_i$）、小角近似の解は？
+また、真上を通り抜ける（回転運動になる）ために必要な、最下点での最小の速さは？
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{pend-sim}
+\code{--theta0-deg 10} と \code{--theta0-deg 170} の動画を見比べ、
+(a) 橙と青のずれ方の違い、(b) 右のグラフで 10 秒間に何周するか、を答えよ。
+表~\ref{tab:pend-ratio} の値と合っているか確かめよ。
+\end{exercise}
+
+%% ================================================================
+\section{まとめ}\label{sec:pend-summary}
+
+\begin{summary}
+\begin{itemize}
+  \item 運動方程式は $\ddot\theta=-(g/L)\sin\theta$。質量に依存しない。
+  \item 小角近似では単振動で周期 $T_0=2\pi\sqrt{L/g}$。振幅によらない（等時性）。
+  \item 厳密な周期は楕円積分 $T=(4/\omega_0)K(\sin(\theta_0/2))$。振幅が大きいほど伸びる。
+  \item 周期の伸びは小振幅では $\theta_0^2/16$。$\ang{120}$ で $37\%$、真上に近づくと発散。
+  \item 位相空間では等エネルギー曲線の上を動く。数値解法の良し悪しはその曲線から外れないかで見える。
+\end{itemize}
+\end{summary}
+
+\section{発展}\label{sec:pend-advanced}
+\begin{itemize}
+  \item \textbf{ラグランジュ形式}: $\Lagr=\tfrac12mL^2\dot\theta^2+mgL\cos\theta$ に
+    オイラー＝ラグランジュ方程式を使うと、張力を考えずに同じ運動方程式が得られる
+    （第\ref{ch:eom}章で一般的に学ぶ）。
+  \item \textbf{二重振り子}: 自由度が 2 になり、カオスが現れる。
+  \item \textbf{減衰・強制振動}: 摩擦と外力を加え、共鳴を調べる。
+  \item \textbf{回転運動}: 分離線を越えて回り続ける領域。
+\end{itemize}
+
+%% ================================================================
+\section{演習の解答}\label{sec:pend-solutions}
+
+\begin{solution}{pend-t0}
+$T_0=2\pi\sqrt{0.25/9.81}=2\pi\times0.1596\approx\qty{1.003}{s}$。
+（長さを $1/4$ にすると周期は $1/2$。$T_0\propto\sqrt L$。）
+\end{solution}
+
+\begin{solution}{pend-speed}
+式~\eqref{eq:pend-omega} の後の式より
+$v=\sqrt{2gL(1-\cos\theta_0)}=\sqrt{2\times9.81\times1\times1.5}=\sqrt{29.43}\approx\qty{5.42}{m/s}$。
+$\cos\ang{120}=-0.5$ なので $1-\cos\theta_0=1.5$。質量は不要。
+\end{solution}
+
+\begin{solution}{pend-approx}
+$\theta_0=\qty{1.0472}{rad}$。第 1 項まで: $1+1.0966/16=1.0685$。厳密値は 1.0732（誤差 $-0.43\%$）。
+$11\theta_0^4/3072=11\times1.2026/3072=0.00431$ を足すと $1.0728$。
+厳密値 1.0732 との差は $0.04\%$ まで縮まる。
+\end{solution}
+
+\begin{solution}{pend-diverge}
+(a) 真上は不安定な釣り合い点（力が 0）。そこに近い高さから放すと、頂点付近で速度がほとんど 0 になり、
+通過に非常に長い時間がかかる。
+(b) $k=\sin(\theta_0/2)\to1$ で $K(k)=\int_0^{\pi/2}d\varphi/\sqrt{1-k^2\sin^2\varphi}$ の被積分関数が
+$\varphi=\pi/2$ で発散する（積分値は対数的に発散）。
+\ref{sec:pend-amplitude}節の $T\simeq(4/\omega_0)\ln[4/\cos(\theta_0/2)]$。
+\end{solution}
+
+\begin{solution}{pend-initvel}
+小角近似: $\theta(t)=\theta_0\cos\omega_0t+(\omega_i/\omega_0)\sin\omega_0t$
+（コードの \code{small_angle_solution}）。
+回転になる条件: $E/m>2gL$。最下点で $E/m=\tfrac12v^2$ なので $v>2\sqrt{gL}$。
+$L=\qty{1}{m}$ で $v>\qty{6.26}{m/s}$。
+\end{solution}
+
+\begin{solution}{pend-sim}
+解答の目安: $\ang{10}$ ではほぼ重なったまま（$T/T_0=1.0019$）。
+$\ang{170}$ では $T=2.4394\,T_0=\qty{4.89}{s}$ なので、10 秒間に約 2 周。
+橙（$T_0=\qty{2.006}{s}$）は約 5 周する。
+\end{solution}
