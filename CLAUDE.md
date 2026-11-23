@@ -9,8 +9,10 @@
 ```powershell
 uv sync                           # 環境構築
 uv add <pkg>                      # 依存追加（開発用は uv add --dev <pkg>）
-uv run physlab list               # シミュレーション一覧
+uv run physlab list               # コマンド一覧（シミュレーション・figures・textbook）
 uv run physlab run <name> [args]  # 実行（出力は outputs/<topic>/）
+uv run physlab run figures        # 教科書に貼る図を作る（outputs/figures/*.pdf）
+uv run physlab run textbook       # 教科書（TeX）を PDF にする: 図 → LuaLaTeX → 検査
 uv run pytest                     # テスト（層の依存ルールの検査も含む）
 uv run lint-imports               # 層の依存ルールだけを検査
 uv run ruff check . ; uv run ruff format .
@@ -45,31 +47,36 @@ presentation ──▶ infrastructure ──▶ application ──▶ domain | n
 
 ## 開発フロー（必ずこの順）
 
-0. **教科書の章**（`docs/textbook/NN-topic/MM-name.md`）: 物理の理論・導出・演習。`_template.md` をコピー。
-   式は途中を省略せず、数値は計算してから書く。
+0. **教科書の章**（TeX。`docs/textbook/tex/chapters/<部>/NN-name.tex`）: 物理の理論・導出・演習。
+   `docs/textbook/tex/_template.tex` をコピーして `main.tex` から `\input` する。
+   式は途中を省略せず、数値は計算してから書く。問題は `exercise`、解答は章末の `solution`（鍵で相互リンク）。
 1. **設計書**: `docs/design/000-template.md` をコピーして `docs/design/NNN-名前.md`。
    支配方程式・仮定・数値手法・**検証方法**を先に決める。
 2. **実装**: 内側の層から順に（domain → numerics → application → infrastructure → presentation）。
 3. **検証**: 層ごとにテスト。domain は式・極限・特殊値、application は解析解・保存則との照合。
    「動いた」ではなく「物理的に正しい」ことをテストで示す。
 4. **目視**: 動画から 1 フレーム抜いて（`ffmpeg -ss <秒> -i x.mp4 -frames:v 1 f.png`）見た目を確認する。
-   表示範囲の切れ・時間のずれ・文字化けは数値テストでは見つからない。
+   教科書は `uv run physlab run textbook --preview <ページ>` で PNG にして見る。
+   表示範囲の切れ・時間のずれ・文字化け・凡例の重なりは数値テストでは見つからない。
 5. **知見の記録**: 分かったこと・ハマったことを `docs/knowledge/` に残す。
    数値は実測値を書き、未検証の推測は「未検証」と明記する。
 6. `docs/roadmap.md` のチェックと、`docs/README.md`・`docs/textbook/README.md` の一覧を更新する。
+   `uv run physlab run textbook` で未解決の参照が 0 であることを確認する。
 
 設計と実装がずれたら、設計書を直す（コードだけ直して放置しない）。
 
 ## 新しい題材を足すチェックリスト
 
-- [ ] 教科書の章 `docs/textbook/…`
+- [ ] 教科書の章 `docs/textbook/tex/chapters/…`（TeX。`main.tex` に `\input` を足す）
 - [ ] 設計書 `docs/design/NNN-….md`
 - [ ] `domain/<topic>/<name>.py`（＋ `__init__.py` が無ければ追加）
 - [ ] `application/<topic>/<name>.py`（結果の dataclass を返す）
 - [ ] `infrastructure/rendering/<topic>/<name>.py`（結果を受け取って描く）
 - [ ] `presentation/commands/<topic>/<name>.py`（`NAME` / `TITLE` / `main`）→ 自動で `physlab list` に出る
+- [ ] 教科書に貼る図があれば、同じコマンドに `figures() -> list[Path]` を足す（`figure_path("名前")` に PDF で出す）。
+  `tests/presentation/test_figures.py` の `EXPECTED_FIGURES` にも足す
 - [ ] テスト（domain / application は必須、描画は煙テスト、CLI は既存の `test_cli.py` が一覧を検査）
-- [ ] 動画のフレームを目視、`uv run pytest` と `uv run ruff check .` を通す
+- [ ] 動画のフレームと PDF のページを目視、`uv run pytest` と `uv run ruff check .` を通す
 - [ ] 知見・roadmap・各 README の一覧を更新
 
 ## 規約
@@ -82,9 +89,16 @@ presentation ──▶ infrastructure ──▶ application ──▶ domain | n
 - テストは `--import-mode=importlib`（同名ファイル可）。テストファイル同士は import できないので、
   共有は `tests/conftest.py` のフィクスチャで行う。テストは `PHYSLAB_OUTPUT_DIR` を tmp に向けるので
   `outputs/` を汚さない。
-- `outputs/` は Git 管理外。生成物をコミットしない。
+- `outputs/` は Git 管理外。生成物（動画・図・PDF）をコミットしない。教科書は TeX が原稿で、PDF は作って読む。
+- 教科書の TeX は LuaLaTeX + LuaTeX-ja + 原ノ味フォント（MiKTeX）。仕組みは `docs/design/004-tex-textbook.md`。
+- matplotlib の数式（mathtext）の文字列は **raw 文字列**（`r"$\theta$"`）にする。普通の文字列だと
+  `\t` がタブになり、`$\theta$` が「heta」と出る（実際にやった）。
+- テストは `tests/` を src の鏡写しにするが、`tests/docs/`（教科書の TeX ソースの整合性）は層ではない例外。
 
 ## Windows / PowerShell の注意
+
+- **シェルのヒアドキュメントにバックスラッシュを含む文章（TeX・正規表現・mathtext）を書かない。**
+  ツール経由でバックスラッシュが減ることがある。ファイルは Write / Edit ツールで作る。
 
 - ファイルの編集には Edit / Write ツールを使う。Windows PowerShell 5.1 の
   `Set-Content -Encoding utf8` は **BOM を付ける**、`Get-Content`（`-Encoding` なし）は

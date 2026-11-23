@@ -43,5 +43,5 @@
 
 - [numerics/integrators.py](../../src/physlab/numerics/integrators.py)
 - [tests/numerics/test_integrators.py](../../tests/numerics/test_integrators.py)
-- 理論と導出は教科書 [第0-1章](../textbook/00-foundations/01-ode-and-numerical-integration.md)
+- 理論と導出は教科書 [第 1 章](../textbook/tex/chapters/00-foundations/01-ode-and-numerical-integration.tex)
   （調和振動子ではオイラー法がステップごとにエネルギーをちょうど (1 + dt²) 倍にする）

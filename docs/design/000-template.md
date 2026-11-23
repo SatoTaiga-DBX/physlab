@@ -2,7 +2,7 @@
 
 - 状態: 下書き / 実装中 / 実装済み / 検証済み
 - 作成日: YYYY-MM-DD
-- 教科書: `docs/textbook/NN-<topic>/MM-<name>.md`
+- 教科書: `docs/textbook/tex/chapters/<部>/NN-<name>.tex`
 - 実装（層ごと）:
   - `src/physlab/domain/<topic>/<name>.py`
   - `src/physlab/application/<topic>/<name>.py`
@@ -37,6 +37,7 @@
 ## 5. 可視化の設計
 
 動画のレイアウト、何を同時に見せるか、色・軸の決め方。
+教科書に貼る静止画は、コマンドの `figures()` で `outputs/figures/` に PDF で出す（名前も決めておく）。
 
 ## 6. 検証方法（必須）
 

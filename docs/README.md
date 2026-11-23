@@ -5,7 +5,7 @@
 
 | 場所 | 役割 | 書くタイミング |
 |---|---|---|
-| [textbook/](textbook/README.md) | **教科書**。理論・導出・演習。読んで学ぶ | 題材の最初（シミュレーションの前後に読む） |
+| [textbook/](textbook/README.md) | **教科書**（LaTeX。PDF にして読む）。理論・導出・演習 | 題材の最初（シミュレーションの前後に読む） |
 | [design/](design/) | **設計書**。何をどう作るか、どう検証するか | **実装の前**（実装後にずれたら直す） |
 | [knowledge/](knowledge/) | **知見**。実装・実行して分かったこと、ハマったこと | 実装・検証の**後** |
 | [roadmap.md](roadmap.md) | 取り組む題材の一覧と進捗 | 題材を決めたとき・終えたとき |
@@ -17,10 +17,11 @@
 
 | 章 | 題 |
 |---|---|
-| [0-1](textbook/00-foundations/01-ode-and-numerical-integration.md) | 微分方程式と数値積分 |
-| [1-1](textbook/01-mechanics/01-pendulum.md) | 単振り子 |
+| [第 1 章](textbook/tex/chapters/00-foundations/01-ode-and-numerical-integration.tex) | 微分方程式と数値積分 |
+| [第 2 章](textbook/tex/chapters/01-mechanics/01-pendulum.tex) | 単振り子 |
+| [第 3 章](textbook/tex/chapters/02-analytical-mechanics/01-equations-of-motion.tex) | 運動方程式（ランダウ＝リフシッツ『力学』第 I 章 §1–§5） |
 
-目次と書き方は [textbook/README.md](textbook/README.md)。
+PDF の作り方・目次・書き方は [textbook/README.md](textbook/README.md)。
 
 ## 設計書 (`design/`)
 
@@ -30,6 +31,8 @@
 | [001](design/001-architecture.md) | プロジェクト全体の設計と決定事項 | 実装済み |
 | [002](design/002-pendulum.md) | 単振り子 | 実装済み・検証済み |
 | [003](design/003-layered-architecture.md) | レイヤー構成（オニオン／クリーンアーキテクチャ流） | 実装済み・検証済み |
+| [004](design/004-tex-textbook.md) | 教科書の TeX 化と PDF ビルド（`physlab run textbook`） | 実装済み・検証済み |
+| [005](design/005-analytical-mechanics-ch1.md) | 解析力学入門（ランダウ＝リフシッツ第 I 章）のシミュレーション | 実装済み・検証済み |
 
 ## 知見 (`knowledge/`)
 
@@ -38,6 +41,8 @@
 | [numerical-integration.md](knowledge/numerical-integration.md) | オイラー / RK4 / ベルレ法の精度とエネルギー保存の違い（実測） |
 | [visualization.md](knowledge/visualization.md) | matplotlib で動画を作るときの落とし穴と対処 |
 | [architecture.md](knowledge/architecture.md) | 層構造・import-linter・テスト配置を運用して分かったこと |
+| [analytical-mechanics.md](knowledge/analytical-mechanics.md) | 最小作用の原理・一般座標・ガリレイ変換のシミュレーションの実測値と、ハマった点 |
+| [latex-textbook.md](knowledge/latex-textbook.md) | LuaLaTeX（MiKTeX）で日本語の教科書を組むときの設定・警告・ハマった点 |
 
 ## 書き方のルール
 

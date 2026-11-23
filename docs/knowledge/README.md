@@ -15,3 +15,5 @@
 - [numerical-integration.md](numerical-integration.md) — 数値積分：手法ごとの精度とエネルギー保存
 - [visualization.md](visualization.md) — 可視化：matplotlib で動画を作るときの落とし穴
 - [architecture.md](architecture.md) — アーキテクチャ：層構造・import-linter・テスト配置を運用して分かったこと
+- [analytical-mechanics.md](analytical-mechanics.md) — 解析力学：最小作用の原理・一般座標・ガリレイ変換の実測値
+- [latex-textbook.md](latex-textbook.md) — TeX 教科書：LuaLaTeX（MiKTeX）の設定・警告・ハマった点

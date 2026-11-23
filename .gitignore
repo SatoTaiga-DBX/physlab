@@ -7,8 +7,21 @@ __pycache__/
 .import_linter_cache/
 *.egg-info/
 
-# シミュレーション出力（動画・画像は再生成できるのでコミットしない）
+# シミュレーション出力（動画・図・教科書の PDF は再生成できるのでコミットしない）
 outputs/
+
+# TeX の中間ファイル（通常のビルドは outputs/textbook/ に出るので、手で直接コンパイルした場合の保険）
+*.aux
+*.log
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.lof
+*.lot
+*.bbl
+*.blg
 
 # OS / editor
 .DS_Store
