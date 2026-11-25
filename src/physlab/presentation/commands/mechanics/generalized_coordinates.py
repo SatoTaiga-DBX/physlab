@@ -28,13 +28,10 @@ TITLE = "一般座標：位置だけでは運動は決まらない（単振り�
 TOPIC = "mechanics"
 
 
-def figures(
-    theta1_deg: float = 90.0, theta2_deg: float = 0.0, duration: float = 10.0
-) -> list[Path]:
-    """教科書の図 2 枚（``outputs/figures/gc-*.pdf``）。"""
+def figures() -> list[Path]:
+    """教科書の図 2 枚（``outputs/figures/gc-*.pdf``）。常に教科書の条件で作る。"""
     runs = same_position_different_velocity(np.deg2rad(60.0), np.array([0.0, 2.0, -3.0, 4.0]))
-    params = DoublePendulumParams(theta1=np.deg2rad(theta1_deg), theta2=np.deg2rad(theta2_deg))
-    double = simulate_double_pendulum(params, duration)
+    double = simulate_double_pendulum(DoublePendulumParams(), 10.0)
     return [
         render_same_coordinate_figure(runs, figure_path("gc-same-q")),
         render_double_pendulum_figure(double, figure_path("gc-double-pendulum-config")),
@@ -71,7 +68,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  基準振動 {mode + 1}: 周期 実測 {measured:.5f} s / 理論 {theory:.5f} s")
 
     print("図を作成中...")
-    for path in figures(args.theta1_deg, args.theta2_deg, args.duration):
+    for path in figures():  # 引数を変えても、教科書の図は既定の条件のまま
         print(f"  -> {path}")
     if not args.no_video:
         print("動画を作成中...")

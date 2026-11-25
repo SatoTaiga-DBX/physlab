@@ -35,10 +35,12 @@ GRAVITY = uniform_gravity(mass=1.0, g=9.81)
 OSCILLATOR = harmonic_oscillator(mass=1.0, omega=2.0 * np.pi)  # π/ω = 0.5 s
 TAU_SHORT, TAU_LONG = 0.3, 0.8  # 調和振動子で、π/ω より短い／長い時間
 Q_START, Q_END = 1.0, 0.0  # 調和振動子の両端の位置
+TAU_GRAVITY = 2.0  # 教科書の一様重力の例の時間の長さ
 
 
-def figures(tau: float = 2.0) -> list[Path]:
-    """教科書の図 5 枚（``outputs/figures/la-*.pdf``）。``tau`` は一様重力の例の時間の長さ。"""
+def figures() -> list[Path]:
+    """教科書の図 5 枚（``outputs/figures/la-*.pdf``）。常に教科書の条件で作る。"""
+    tau = TAU_GRAVITY
     eps = np.linspace(-2.0, 2.0, 21)
     eps_osc = np.linspace(-1.0, 1.0, 21)
 
@@ -62,7 +64,9 @@ def figures(tau: float = 2.0) -> list[Path]:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog=f"physlab run {NAME}", description=TITLE)
-    p.add_argument("--duration", type=float, default=2.0, help="一様重力の例の時間の長さ τ [s]")
+    p.add_argument(
+        "--duration", type=float, default=TAU_GRAVITY, help="一様重力の例の時間の長さ τ [s]"
+    )
     p.add_argument("--fps", type=int, default=24, help="動画のフレームレート")
     p.add_argument("--no-video", action="store_true", help="動画を作らず、図だけ作る")
     args = p.parse_args(argv)
@@ -81,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  調和振動子 τ={tau_osc} s: c1={cs[0]:+.3f}, c2={cs[1]:+.3f}（π/ω = 0.5 s）")
 
     print("図を作成中...")
-    for path in figures(tau):
+    for path in figures():  # 引数を変えても、教科書の図は既定の条件のまま
         print(f"  -> {path}")
 
     if not args.no_video:

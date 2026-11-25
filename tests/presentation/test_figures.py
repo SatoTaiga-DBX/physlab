@@ -1,5 +1,6 @@
 """教科書の図の生成（`physlab run figures`）と、textbook コマンドの入口の検査。"""
 
+import inspect
 from pathlib import Path
 
 from physlab.presentation.cli import discover, main
@@ -19,17 +20,31 @@ EXPECTED_FIGURES = {
     "gal-train",
     "gal-action-shift",
     "gal-two-body",
+    "cons-symmetry",
+    "cons-integrators",
+    "cons-rotating-rod",
+    "com-throw",
+    "com-decomposition",
+    "am-areal",
+    "sim-periods",
+    "sim-collapse",
+    "sim-virial",
 }
 
 
 def test_new_commands_are_discovered_and_provide_figures() -> None:
     names = set(discover())
     assert {"least-action", "generalized-coordinates", "galilean", "figures", "textbook"} <= names
+    assert {"symmetry", "center-of-mass", "areal-velocity", "similarity"} <= names
     assert set(figure_providers()) == {
         "pendulum",
         "least-action",
         "generalized-coordinates",
         "galilean",
+        "symmetry",
+        "center-of-mass",
+        "areal-velocity",
+        "similarity",
     }
 
 
@@ -45,6 +60,12 @@ def test_run_figures_with_a_name_makes_only_that_command(tmp_path: Path) -> None
     assert main(["run", "figures", "galilean"]) == 0
     written = {p.stem for p in (tmp_path / "outputs" / "figures").glob("*.pdf")}
     assert written == {"gal-train", "gal-action-shift", "gal-two-body"}
+
+
+def test_figure_functions_take_no_arguments() -> None:
+    """コマンドの引数を変えても、教科書の図が別の条件で上書きされないようにする。"""
+    for name, module in figure_providers().items():
+        assert not inspect.signature(module.figures).parameters, name
 
 
 def test_run_figures_rejects_an_unknown_command(capsys) -> None:

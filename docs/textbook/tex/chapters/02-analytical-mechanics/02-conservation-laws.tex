@@ -1,0 +1,673 @@
+\chapter{保存法則}\label{ch:cons}
+\chapterinfo{★★★}{約 150 分}{2026-11-26}
+\correspondsto{ランダウ＝リフシッツ『力学』\cite{ll-mech} 第 II 章 §6〜§10}
+
+\begin{objectives}
+\begin{enumerate}
+  \item 時間と空間の対称性から、エネルギー・運動量・角運動量の保存を導ける。
+  \item 対称性を壊したとき、どの量がどんな速さで変化するかを予測できる。
+  \item 系の運動を、慣性中心（重心）の運動と内部の運動に分けて考えられる。
+  \item 中心力では面積速度が一定になることを示せる。
+  \item ポテンシャルが同次式のとき、力学的相似から周期の振幅依存とビリアル定理を導ける。
+\end{enumerate}
+\end{objectives}
+
+\begin{note}
+この章は、ランダウ＝リフシッツ『力学』\cite{ll-mech} 第 II 章が扱う話題を参考に、
+「対称性を壊す数値実験」を軸にして書き下ろした学習ノートである。構成・図・演習は独自のもので、
+同書の文章・図・問題を写したものではない（原典との照合はしていない）。
+節の見出しの下の対応は、原典と読み比べるための道しるべである。
+\end{note}
+
+\paragraph{前提}
+第\ref{ch:eom}章（ラグランジュ方程式、ガリレイ変換、質点系のラグランジアン）。
+
+%% ================================================================
+\section{導入：解かなくても分かること}\label{sec:cons-intro}
+
+3 つの質点を、すべてのペアでばねにつなぐ。放すと、回りながら伸び縮みする複雑な運動になる。
+この運動を紙の上で解くことはできない。それでも、数値で追ってみると
+\textbf{いくつかの量は、最初の値のまま少しも動かない}。
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run symmetry      # 図 3 枚と動画（outputs/mechanics/）
+\end{terminal}
+動画 \path{symmetry_cluster.mp4} の右上では、各質点の運動量は激しく変わるのに、合計は水平な直線のままである。
+右下の運動エネルギーとばねのエネルギーも、揺れ動くのは内訳だけで、合計は動かない。
+\end{simbox}
+
+このような、運動の間ずっと一定の量を\textbf{運動の積分}（保存量）という。
+自由度 $s$ の閉じた系には、原理的には $2s-1$ 個の独立な運動の積分がある。
+しかし、そのほとんどは複雑で役に立たない。大事なのは、\textbf{時間と空間の対称性}から出てくる少数の量で、
+それらは「部分の和が全体になる」という扱いやすい性質も持っている。
+
+この章の問いは、「\textbf{何が保存するかは、何で決まるのか}」である。
+
+%% ================================================================
+\section{対称性と保存量}\label{sec:noether}
+
+先に、全体を見通す一般論を述べる。エネルギー以外の保存量は、すべてここから出る。
+
+座標を少しだけずらす変換 $q_i\to q_i+\varepsilon f_i(q,t)$（$\varepsilon$ は微小）を考える。
+速度は $\dot q_i\to\dot q_i+\varepsilon\dot f_i$ となるので、ラグランジアンの変化は
+\begin{equation}
+  \delta\Lagr=\varepsilon\sum_i\left(\pdiff{\Lagr}{q_i}f_i+\pdiff{\Lagr}{\dot q_i}\dot f_i\right).
+\end{equation}
+$p_i=\partial\Lagr/\partial\dot q_i$ とおく。ラグランジュ方程式~\eqref{eq:lagrange} は $\partial\Lagr/\partial q_i=\dot p_i$ だから
+\begin{equation}
+  \delta\Lagr=\varepsilon\sum_i\left(\dot p_if_i+p_i\dot f_i\right)=\varepsilon\,\diff{}{t}\sum_ip_if_i .
+  \label{eq:noether-variation}
+\end{equation}
+ここで、この変換で $\Lagr$ が\textbf{全微分だけしか変わらない}（$\delta\Lagr=\varepsilon\,\dd F/\dd t$）とする。
+全微分を足しても運動方程式は変わらないので（\ref{sec:lagr-ambiguity}節）、これは「物理が変わらない変換」である。
+このとき式~\eqref{eq:noether-variation} の両辺を比べて、次が得られる。
+
+\begin{result}{対称性があれば保存量がある（ネーターの定理の力学版）}{noether}
+変換 $q_i\to q_i+\varepsilon f_i$ で $\Lagr$ の変化が $\varepsilon\,\dd F/\dd t$ なら、
+\begin{equation}
+  \sum_ip_if_i-F=\text{一定},\qquad p_i=\pdiff{\Lagr}{\dot q_i}.
+  \label{eq:noether}
+\end{equation}
+\end{result}
+
+この章で使う対称性と保存量を先にまとめておく（表~\ref{tab:symmetry-map}）。
+時間をずらす対称性だけは式~\eqref{eq:noether} の形に入らないので、次の節で別に扱う。
+
+\begin{table}[htbp]
+\centering
+\caption{対称性と保存量}\label{tab:symmetry-map}
+\begin{tabularx}{\linewidth}{@{}Lll@{}}
+\toprule
+対称性（何をしても物理が変わらないか） & 保存量 & 節 \\
+\midrule
+時間をずらす（時間の一様性） & エネルギー $E$ & \ref{sec:cons-energy} \\
+系全体を平行移動する（空間の一様性） & 運動量 $\bm P$ & \ref{sec:cons-momentum} \\
+一定の速度で動く系に移る（ガリレイ変換） & $M\bm R-\bm Pt$ & \ref{sec:cons-center} \\
+系全体を回す（空間の等方性） & 角運動量 $\bm L$ & \ref{sec:cons-angular} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ================================================================
+\section{エネルギー}\label{sec:cons-energy}
+\correspondsto{ランダウ＝リフシッツ §6}
+
+時間が一様、すなわち $\Lagr$ が時刻 $t$ を陽に含まないとする。$\Lagr$ の時間変化は
+$q,\dot q$ を通してだけ起こるので
+\begin{equation}
+  \diff{\Lagr}{t}=\sum_i\left(\pdiff{\Lagr}{q_i}\dot q_i+\pdiff{\Lagr}{\dot q_i}\ddot q_i\right)
+  =\sum_i\left(\dot p_i\dot q_i+p_i\ddot q_i\right)=\diff{}{t}\sum_ip_i\dot q_i .
+\end{equation}
+右辺を左辺に移すと $\dfrac{\dd}{\dd t}\bigl(\sum p_i\dot q_i-\Lagr\bigr)=0$。
+
+\begin{result}{エネルギーの保存}{energy}
+$\Lagr$ が $t$ を陽に含まなければ、
+\begin{equation}
+  E=\sum_i\dot q_i\pdiff{\Lagr}{\dot q_i}-\Lagr
+  \label{eq:energy-function}
+\end{equation}
+は一定である。$t$ を陽に含むときは、$\dd E/\dd t=-\partial\Lagr/\partial t$。
+\end{result}
+
+\paragraph{いつ $E=T+U$ になるか}
+$\Lagr=T(q,\dot q)-U(q)$ で、$T$ が一般速度の 2 次形式 $T=\tfrac12\sum a_{ik}(q)\dot q_i\dot q_k$
+（式~\eqref{eq:T-general}）なら、$\partial T/\partial\dot q_j=\sum_ka_{jk}\dot q_k$ なので
+$\sum_j\dot q_j\,\partial T/\partial\dot q_j=2T$。よって
+\begin{equation}
+  E=2T-(T-U)=T+U .
+\end{equation}
+
+\subsection*{落とし穴：$E$ が保存しても、$T+U$ が保存するとは限らない}
+
+一定の角速度 $\omega$ で回る水平な棒に、質点を通す。棒の上の位置 $r$ を一般座標にすると
+$x=r\cos\omega t,\ y=r\sin\omega t$ で、速さの 2 乗は $\dot r^2+\omega^2r^2$。したがって
+\begin{equation}
+  \Lagr=\tfrac12m\left(\dot r^2+\omega^2r^2\right).
+\end{equation}
+$\Lagr$ は $t$ を含まないので、式~\eqref{eq:energy-function} の
+$E=p_r\dot r-\Lagr=\tfrac12m(\dot r^2-\omega^2r^2)$ は保存する。
+ところが運動エネルギーは $T=\tfrac12m(\dot r^2+\omega^2r^2)$ で、こちらは保存しない。
+座標の定義 $x=r\cos\omega t$ が時間に依るので、$T$ が $\dot r$ の 2 次形式にならないためである。
+
+運動方程式は $\ddot r=\omega^2r$、静かに放すと $r=r_0\cosh\omega t$。
+棒を回し続けるにはモーターが仕事率 $2mr\dot r\,\omega^2$ を与える必要があり、その仕事が $T$ の増加になる。
+図~\ref{fig:cons-rotating-rod} は $r_0=\qty{0.5}{m}$、$\omega=\qty{1}{rad/s}$、$m=\qty{1}{kg}$ の数値解である。
+
+\physfig[0.85]{cons-rotating-rod}{回転する棒の上の質点。$E=p_r\dot r-\Lagr$ は一定だが、運動エネルギー $T$ は増える。
+灰色の「$T-$モーターの仕事」が水平なので、増えた分はモーターが与えた仕事である。}{cons-rotating-rod}
+
+数値では、$E$ は終始 \qty{-0.125}{J} のまま、$T$ は \qty{0.125}{J} から \qty{1.258}{J}（$t=\qty{1.5}{s}$）に増え、
+モーターの仕事 \qty{1.133}{J} と増加分の差は $4\times10^{-7}\,\mathrm{J}$ だった。
+
+%% ================================================================
+\section{運動量}\label{sec:cons-momentum}
+\correspondsto{ランダウ＝リフシッツ §7}
+
+空間が一様なら、系全体を平行移動しても物理は変わらない。すべての質点を同じ微小ベクトル
+$\varepsilon\bm n$ だけずらす（$f_a=\bm n$、$F=0$）。式~\eqref{eq:noether} より
+$\sum_a\bm p_a\cdot\bm n$ が一定。$\bm n$ は任意の向きなので、次を得る。
+
+\begin{result}{運動量の保存}{momentum}
+閉じた系では、全運動量
+\begin{equation}
+  \bm P=\sum_a\pdiff{\Lagr}{\bm v_a}=\sum_am_a\bm v_a
+\end{equation}
+は一定である。
+\end{result}
+
+同じことを力の言葉で言うと、並進対称性は $\sum_a\partial\Lagr/\partial\bm r_a=0$、すなわち
+$\sum_a\bm F_a=0$ を意味する。2 つの質点なら $\bm F_1=-\bm F_2$（作用・反作用の法則）である。
+
+\paragraph{一般化運動量と循環座標}
+一般座標 $q_i$ に対して $p_i=\partial\Lagr/\partial\dot q_i$ を\textbf{一般化運動量}、
+$\partial\Lagr/\partial q_i$ を一般化力という。ラグランジュ方程式は $\dot p_i=\partial\Lagr/\partial q_i$ だから、
+\textbf{$\Lagr$ が $q_i$ を含まなければ $p_i$ は保存する}。このような座標を循環座標という。
+
+\paragraph{一部の方向だけの対称性}
+外場があっても、ある方向に一様ならば、その方向の運動量成分は保存する。
+一様な重力（下向き）の中では、水平方向の運動量は保存し、鉛直方向は $\dot P_y=-Mg$ で減り続ける
+（\ref{sec:cons-experiment}節で確かめる）。
+
+%% ================================================================
+\section{慣性中心}\label{sec:cons-center}
+\correspondsto{ランダウ＝リフシッツ §8}
+
+速度 $\bm V$ で動く慣性系に移ると、運動量は $\bm P'=\bm P-M\bm V$（$M=\sum m_a$ は全質量）となる。
+$\bm V=\bm P/M$ と選べば $\bm P'=0$。この系を\textbf{系全体が静止している系}と呼べる。
+この $\bm V$ は、重心
+\begin{equation}
+  \bm R=\frac{\sum_am_a\bm r_a}{M}
+\end{equation}
+の速度 $\dot{\bm R}$ にほかならない。つまり $\bm P=M\dot{\bm R}$。
+\textbf{質点系は全体として、重心にある質量 $M$ の 1 つの質点のように動く}。
+
+\subsection*{ガリレイ変換に対応する保存量}
+
+式~\eqref{eq:noether} をガリレイ変換に使うと、見落としがちな保存量が出る。
+$f_a=t\,\bm n$（速度を $\varepsilon\bm n$ だけ足す）とすると、第\ref{ch:eom}章で見たように
+$\Lagr$ の変化は全微分で、$F=\bm n\cdot M\bm R$。よって $\sum\bm p_a\cdot(t\bm n)-F=\bm n\cdot(\bm Pt-M\bm R)$ が一定。
+\begin{equation}
+  M\bm R-\bm P\,t=\text{一定}.
+  \label{eq:com-theorem}
+\end{equation}
+これは「重心は等速直線運動をする」という主張そのものである。
+導入の 3 質点で数値を見ると、$M\bm R-\bm Pt=(3.0,\ 1.35)$ のまま、ずれは $5\times10^{-14}$ だった。
+
+\subsection*{エネルギーを分ける}
+
+各質点の速度を $\bm v_a=\dot{\bm R}+\bm v'_a$（$\bm v'_a$ は重心に対する速度）と書くと、
+$\sum m_a\bm v'_a=0$ なので交差項が消えて
+\begin{equation}
+  E=\tfrac12M\dot{\bm R}^2+E_{\rm int},\qquad
+  E_{\rm int}=\sum_a\tfrac12m_av'^2_a+U .
+  \label{eq:energy-split}
+\end{equation}
+$E_{\rm int}$ を\textbf{内部エネルギー}という。
+
+\subsection*{実験：回しながら投げる}
+
+3 質点（ばね定数を \qty{200}{N/m} に固くする）を、重心の初速 $(3,\,8)\,\mathrm{m/s}$ と回転
+\qty{6}{rad/s} を与えて、重力 $g=\qty{9.81}{m/s^2}$ の中へ投げる。
+
+\physfig[0.9]{com-throw}{回りながら振動して飛ぶ 3 質点。各質点の軌跡は複雑だが、重心（太い黒線）は放物線を描く。}{com-throw}
+
+一様な重力では、重心に対する相対運動に対して、重力がする仕事の合計は
+$\sum_am_a\bm g\cdot\bm v'_a=\bm g\cdot\sum_am_a\bm v'_a=0$ である。
+だから重力は重心の運動だけを変え、内部のエネルギーと内部の回転には手を出さない。
+
+\physfig[0.97]{com-decomposition}{左: エネルギー。重心の運動と重力の和も、内部エネルギーも、それぞれ一定。
+右: 角運動量。原点まわりは重力のモーメントで変わるが、重心まわりは一定。}{com-decomposition}
+
+\begin{itemize}
+  \item 重心と放物線の式 $\bm R_0+\bm V_0t+\tfrac12\bm gt^2$ の差は \qty{1.4e-14}{m}（飛行 \qty{1.631}{s}、頂点 \qty{3.262}{m}）。
+  \item 内部エネルギー \qty{41.135}{J} の相対変化は $3\times10^{-6}$ 以下。内訳（内部の運動とばね）は揺れ動く。
+  \item 重心まわりの角運動量 $11.4617\,\mathrm{kg\cdot m^2/s}$ のずれは $10^{-13}$。
+\end{itemize}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run center-of-mass      # 図 2 枚と動画（outputs/mechanics/com_throw.mp4）
+\end{terminal}
+飛行は 2 秒足らずなので、動画は 1/4 倍速で再生される（画面に表示）。
+\end{simbox}
+
+%% ================================================================
+\section{角運動量}\label{sec:cons-angular}
+\correspondsto{ランダウ＝リフシッツ §9}
+
+空間が等方なら、系全体を回しても物理は変わらない。軸 $\bm n$ のまわりの微小回転は
+$f_a=\bm n\times\bm r_a$（速度も同じように回る）、$\Lagr$ は変わらないので $F=0$。式~\eqref{eq:noether} より
+\begin{equation}
+  \sum_a\bm p_a\cdot(\bm n\times\bm r_a)=\bm n\cdot\sum_a\bm r_a\times\bm p_a
+\end{equation}
+が一定。$\bm n$ は任意なので、次を得る。
+
+\begin{result}{角運動量の保存}{angular}
+閉じた系では、
+\begin{equation}
+  \bm L=\sum_a\bm r_a\times\bm p_a
+\end{equation}
+は一定である。（太字の $\bm L$ は角運動量。ラグランジアン $\Lagr$ と区別する。）
+\end{result}
+
+\paragraph{原点と座標系を変える}
+原点をずらして $\bm r_a=\bm r'_a+\bm a$ とすると $\bm L=\bm L'+\bm a\times\bm P$。
+原点の選び方に依らないのは $\bm P=0$ のときだけである。
+重心の分と内部の分に分けると、
+\begin{equation}
+  \bm L=\bm R\times\bm P+\bm L_{\rm int},\qquad
+  \bm L_{\rm int}=\sum_a(\bm r_a-\bm R)\times m_a(\bm v_a-\dot{\bm R}).
+\end{equation}
+
+\paragraph{外場がある場合}
+系全体を回して外場が変わらない軸があれば、その軸の成分は保存する。中心に向かう力なら中心まわりの全成分、
+軸対称な場なら軸方向の成分である。
+投げた 3 質点（図~\ref{fig:com-decomposition}）では、重力は原点まわりの回転の対称性を壊すので
+$\bm L$ の $z$ 成分は $11.46$ から $-164.69$ まで変わる。重心の分は
+$\diff{}{t}(\bm R\times\bm P)_z=-Mg\,X$ より $-MgV_xt^2/2=-176.15$（$t=\qty{1.631}{s}$、$V_x=\qty{3}{m/s}$）で、
+全体はこれと内部の分 $11.46$ の和になる。
+
+\subsection*{円筒座標と面積速度}
+
+$x=\rho\cos\varphi,\ y=\rho\sin\varphi$ とすると、$z$ 成分は
+\begin{equation}
+  L_z=m(x\dot y-y\dot x)=m\rho^2\dot\varphi,
+\end{equation}
+これは $\varphi$ に対する一般化運動量 $p_\varphi$ と同じである。
+微小時間に動径が掃く扇形の面積は $\dd S=\tfrac12\rho^2\dd\varphi$ なので、
+\begin{result}{面積速度}{areal}
+\begin{equation}
+  \diff{S}{t}=\frac12\rho^2\dot\varphi=\frac{L_z}{2m}.
+\end{equation}
+中心力では $L_z$ が一定なので、\textbf{同じ時間に掃く面積は同じ}。
+\end{result}
+ケプラーの第 2 法則は、実は万有引力に限らず、どんな中心力でも成り立つ。
+万有引力でない力 $U=-1/r^{1.4}$ で確かめた（図~\ref{fig:am-areal}）。軌道は閉じず、ロゼット状に回る。
+
+\physfig[0.97]{am-areal}{中心を 1 周する時間を 12 等分した扇形。面積はすべて同じで、軌道に沿った長さは大きく違う。}{am-areal}
+
+\begin{itemize}
+  \item 1 区間（\qty{0.1465}{s}）の面積は 12 区間とも $0.065925\,\mathrm{m^2}$（$=L_z\Delta t/2m$）。
+  \item 弧の長さは \qty{0.132}{m} から \qty{0.494}{m} まで、約 3.7 倍違う。
+  \item 速度ベルレ法では、1 ステップごとの三角形の面積が $hL_z/2m$ に\textbf{丸め誤差で}一致する
+    （相対 $1.6\times10^{-12}$）。理由は\ref{sec:cons-integrators}節。
+\end{itemize}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run areal-velocity      # 図 1 枚と動画（outputs/mechanics/areal_velocity.mp4）
+\end{terminal}
+\end{simbox}
+
+%% ================================================================
+\section{対称性を 1 つずつ壊す}\label{sec:cons-experiment}
+
+保存則が対称性から来るのなら、\textbf{対称性を壊せば、対応する量だけが変わる}はずである。
+導入の 3 質点（$m=1,2,1.5$、ばね定数 20、自然長 1）に、同じ初期状態から 4 通りの外場をかけた。
+外場の強さは $g=1$、$\kappa=1$、脈打つ場合は $\kappa(t)=1+0.5\sin1.3t$ とした（単位は無次元）。
+
+\begin{table}[htbp]
+\centering
+\caption{外場と、保存するはずの量}\label{tab:fields}
+\begin{tabularx}{\linewidth}{@{}Lccccc@{}}
+\toprule
+外場 $U_{\rm ext}$ & 壊れる対称性 & $E$ & $P_x$ & $P_y$ & $L$ \\
+\midrule
+なし & --- & ○ & ○ & ○ & ○ \\
+一様重力 $\sum m_agy_a$ & $y$ の並進、回転 & ○ & ○ & × & × \\
+原点へ引く $\tfrac12\kappa\sum m_ar_a^2$ & 並進 & ○ & × & × & ○ \\
+脈打つ $\tfrac12\kappa(t)\sum m_ar_a^2$ & 並進、時間 & × & × & × & ○ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\physfig[0.97]{cons-symmetry}{4 通りの外場での $E,P_x,P_y,L$。保存する量は水平な直線になる。
+白い点は、壊れた対称性から計算した予測値（力を時間積分したもの）。}{cons-symmetry}
+
+\begin{table}[htbp]
+\centering
+\caption{$t=0$ から 10 までの変化の最大値（実測）}\label{tab:changes}
+\begin{tabular}{lcccc}
+\toprule
+外場 & $\abs{\Delta E}$ & $\abs{\Delta P_x}$ & $\abs{\Delta P_y}$ & $\abs{\Delta L}$ \\
+\midrule
+なし     & $4.1\times10^{-6}$ & $4.9\times10^{-15}$ & $1.1\times10^{-14}$ & $2.7\times10^{-14}$ \\
+一様重力 & $4.1\times10^{-6}$ & $8.9\times10^{-15}$ & $45$ & $12.5$ \\
+原点へ引く & $5.9\times10^{-6}$ & $4.0$ & $3.6$ & $2.1\times10^{-14}$ \\
+脈打つ   & $0.91$ & $3.2$ & $3.9$ & $1.6\times10^{-14}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表~\ref{tab:fields} の○×がそのまま現れた。○の運動量と角運動量は $10^{-14}$ 台（丸め誤差）である。
+○のエネルギーに残る $10^{-6}$ は、物理的な変化ではなく、速度ベルレ法の刻み \qty{1}{ms} による振動である。
+
+壊れた量の変化の速さは、式の上で次のように予測できる。
+\begin{equation}
+  \dot{\bm P}=\sum_a\bm F^{\rm ext}_a,\qquad
+  \dot L=\sum_a\bigl(\bm r_a\times\bm F^{\rm ext}_a\bigr)_z,\qquad
+  \dot E=\pdiff{U_{\rm ext}}{t}.
+  \label{eq:breaking-rates}
+\end{equation}
+内力は打ち消し合うので現れない。式~\eqref{eq:breaking-rates} を数値積分した予測値と実測値の差は、
+$E$ で $6\times10^{-6}$ 以下、$\bm P$ で $3\times10^{-12}$ 以下、$L$ で $2\times10^{-13}$ 以下だった。
+重力の場合の $P_y$ は $1.55$ から $-43.45$ まで、ちょうど $-Mg\,t$（$M=4.5$、$g=1$）で減った。
+
+%% ================================================================
+\section{数値解法はどの保存量を守るか}\label{sec:cons-integrators}
+
+保存量は、数値解法の良し悪しを測る物差しにもなる。外場のない 3 質点を、刻み $h=0.01$ で
+$t=50$ まで、速度ベルレ法と RK4 で解いた（図~\ref{fig:cons-integrators}）。
+
+\physfig[0.97]{cons-integrators}{保存するはずの量のずれ。運動量はどちらも丸め誤差。角運動量はベルレだけが丸め誤差で、
+RK4 は $10^{-8}$ 台のずれが出る。エネルギーはベルレは有界に揺れ、RK4 は小さいが一方向にずれる。}{cons-integrators}
+
+\begin{table}[htbp]
+\centering
+\caption{ずれの最大値}\label{tab:integrators}
+\begin{tabular}{lccc}
+\toprule
+手法 & $\abs{\Delta E}$ & $\abs{\Delta\bm P}$ & $\abs{\Delta L}$ \\
+\midrule
+速度ベルレ & $4.6\times10^{-4}$ & $8.9\times10^{-15}$ & $1.8\times10^{-13}$ \\
+RK4        & $1.3\times10^{-6}$ & $9.5\times10^{-15}$ & $4.7\times10^{-8}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+エネルギーの誤差の大きさでは RK4 が上だが、「保存の仕方」は違う。理由は式で分かる。
+\begin{itemize}
+  \item $\bm P$ は状態の\textbf{1 次式}である。ルンゲ＝クッタ型の方法は、更新が微分の 1 次結合なので、
+    1 次の保存量をすべて厳密に保つ（ベルレも同様）。
+  \item $L$ は状態の\textbf{2 次式}である。速度ベルレ法を「半分の加速 → 移動 → 半分の加速」に分けると、
+    加速では位置を変えないので $\Delta L=\sum\bm r\times(h\bm F/2)=0$（内力のモーメントの和は 0）、
+    移動では速度を変えないので $\Delta L=\sum m(h\bm v)\times\bm v=0$。\textbf{どの段階でも $L$ が変わらない}。
+    RK4 にはこの構造がない。
+\end{itemize}
+面積速度の節で、1 ステップの三角形の面積が厳密に一定だったのも、同じ理由である。
+第\ref{ch:ode}章で見た「次数が高いことと、保存の質がよいことは別」が、ここでも現れている。
+
+%% ================================================================
+\section{力学的相似}\label{sec:similarity}
+\correspondsto{ランダウ＝リフシッツ §10}
+
+ポテンシャルが座標の\textbf{同次関数}、すなわち
+\begin{equation}
+  U(\alpha\bm r_1,\alpha\bm r_2,\dots)=\alpha^kU(\bm r_1,\bm r_2,\dots)
+  \label{eq:homogeneous}
+\end{equation}
+を満たすとする。長さを $\alpha$ 倍、時間を $\beta$ 倍にする（$\bm r\to\alpha\bm r$、$t\to\beta t$）と、
+速度は $\alpha/\beta$ 倍、運動エネルギーは $\alpha^2/\beta^2$ 倍になる。
+$\alpha^2/\beta^2=\alpha^k$、すなわち $\beta=\alpha^{1-k/2}$ に選べば、$\Lagr=T-U$ 全体が $\alpha^k$ 倍になる。
+定数倍は運動方程式を変えないので、次が成り立つ。
+
+\begin{result}{力学的相似}{similarity}
+$U$ が $k$ 次の同次関数なら、ある運動を大きさ $l'/l$ 倍に拡大したものも、同じ方程式の解である。
+このとき対応する時間などの比は
+\begin{equation}
+  \frac{t'}{t}=\left(\frac{l'}{l}\right)^{1-k/2},\quad
+  \frac{v'}{v}=\left(\frac{l'}{l}\right)^{k/2},\quad
+  \frac{E'}{E}=\left(\frac{l'}{l}\right)^{k},\quad
+  \frac{L'}{L}=\left(\frac{l'}{l}\right)^{1+k/2}.
+  \label{eq:similarity}
+\end{equation}
+\end{result}
+
+代表的な 3 つの場合:
+\begin{itemize}
+  \item $k=2$（ばね）: 時間の比が $(l'/l)^0=1$。\textbf{周期は振幅によらない}。単振り子の小さな振れの等時性はこれである。
+    第\ref{ch:pendulum}章の大振幅で周期が伸びたのは、$U\propto1-\cos\theta$ が同次関数ではないからである。
+  \item $k=1$（一様な力）: $t\propto\sqrt l$。落下時間は高さの平方根に比例する。
+  \item $k=-1$（万有引力）: $t\propto l^{3/2}$。\textbf{ケプラーの第 3 法則}である。
+\end{itemize}
+
+\subsection*{周期の公式}
+
+1 次元で $U=\abs{x}^k/k$（$m=1$）の場合、周期は相似則だけでなく、定数まで厳密に求まる。
+エネルギー保存より $\dot x^2=2\bigl(U(A)-U(x)\bigr)$、$x=Au$ とおけば
+\begin{equation}
+  T=4\int_0^A\frac{\dd x}{\sqrt{2(A^k-x^k)/k}}
+  =4\sqrt{\frac k2}\,A^{1-k/2}\int_0^1\frac{\dd u}{\sqrt{1-u^k}},\qquad
+  \int_0^1\frac{\dd u}{\sqrt{1-u^k}}=\frac{\Gamma(1/k)\,\Gamma(1/2)}{k\,\Gamma(1/k+1/2)} .
+  \label{eq:power-period}
+\end{equation}
+振幅への依存は $A^{1-k/2}$ で、相似則~\eqref{eq:similarity} のとおりである。
+
+\subsection*{実験}
+
+$k=1,2,4,6$ について、振幅を 0.25 から 4 まで変えて周期を数値で測った。万有引力は二体問題で
+長半径を変えて測った（図~\ref{fig:sim-periods}）。
+
+\physfig[0.9]{sim-periods}{周期と大きさの両対数グラフ。傾きがそのまま指数 $1-k/2$（万有引力は $3/2$）になる。}{sim-periods}
+
+\begin{table}[htbp]
+\centering
+\caption{周期の振幅依存（実測）}\label{tab:periods}
+\begin{tabular}{rcccc}
+\toprule
+$k$ & 傾き（実測） & 理論 $1-k/2$ & $T(A=1)$ & 公式との差 \\
+\midrule
+1 & $+0.4998$ & $+0.5$ & $5.6569$（$=4\sqrt2$） & $1\times10^{-3}$ \\
+2 & $+0.0000$ & $0$    & $6.2832$（$=2\pi$） & $1\times10^{-7}$ \\
+4 & $-1.0000$ & $-1$   & $7.4163$ & $5\times10^{-8}$ \\
+6 & $-2.0000$ & $-2$   & $8.4131$ & $9\times10^{-8}$ \\
+$-1$（万有引力） & $+1.5000$ & $+1.5$ & --- & $4\times10^{-7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{note}
+$k=1$ だけ精度が落ちるのは、原点で力が不連続だからである。刻みを周期の $1/4000$ にしても、
+8 周期でエネルギーが $2.8\%$ ずれる。刻みを細かくすると、ほぼ比例して小さくなる
+（$1/16000$ で $0.8\%$、$1/64000$ で $0.2\%$）。速度ベルレ法の「エネルギーが保たれる」性質は、力が滑らかな場合の話である。
+\end{note}
+
+相似を目で見るには、振幅の違う運動を、$x/A$ と $t/A^{1-k/2}$ で描き直せばよい。
+$k=4$ では、周期が 4 倍も違う 3 つの運動が 1 本に重なる（図~\ref{fig:sim-collapse}）。
+
+\physfig[0.97]{sim-collapse}{左: 振幅の違う運動（$k=4$）。右: 大きさと時間を相似に直すと、3 本が重なる。}{sim-collapse}
+
+数値の差は $k=1,4,6$ とも $10^{-14}$ 以下だった。刻みを周期に比例させると、\textbf{離散化した計算にも
+相似則がそのまま成り立つ}ためである。
+
+\subsection*{ビリアル定理}
+
+同次性からは、時間平均についての関係も出る。$\sum\bm p\cdot\bm r$ を時間で微分すると、
+\begin{equation}
+  \diff{}{t}\sum_a\bm p_a\cdot\bm r_a=\sum_am_av_a^2-\sum_a\bm r_a\cdot\pdiff U{\bm r_a}=2T-kU,
+\end{equation}
+ここで同次関数の性質 $\sum\bm r_a\cdot\partial U/\partial\bm r_a=kU$ を使った。
+運動が有限の範囲にとどまれば $\sum\bm p\cdot\bm r$ も有界なので、長い時間の平均では左辺が 0 になる。
+
+\begin{result}{ビリアル定理}{virial}
+運動が有限の範囲で続くとき、時間平均で
+\begin{equation}
+  2\langle T\rangle=k\,\langle U\rangle .
+  \label{eq:virial}
+\end{equation}
+$E=\langle T\rangle+\langle U\rangle$ と合わせると
+$\langle U\rangle=\dfrac{2E}{k+2},\ \ \langle T\rangle=\dfrac{kE}{k+2}$。
+\end{result}
+
+\physfig[0.9]{sim-virial}{時刻 0 から $t$ までの平均で作った $2\langle T\rangle/\langle U\rangle$。時間が長くなると $k$ に落ち着く。}{sim-virial}
+
+整数周期の平均は、$k=1,2,4,6$ で $0.999999,\ 1.999999,\ 3.999997,\ 5.999995$、
+万有引力（$k=-1$）で $-1.000000$ だった。
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run similarity      # 図 3 枚
+\end{terminal}
+\end{simbox}
+
+%% ================================================================
+\section{検証のまとめ}\label{sec:cons-check}
+
+\begin{table}[htbp]
+\centering
+\caption{この章の主張と確かめ方（すべて \code{uv run pytest} で再現できる）}\label{tab:cons-check}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.38\linewidth}Lc@{}}
+\toprule
+主張 & 確かめ方 & 結果 \\
+\midrule
+壊した対称性に対応する量だけが変わる & 4 通りの外場で $E,\bm P,L$ の変化を調べる & 一致 \\
+変化の速さは式~\eqref{eq:breaking-rates} & 力を時間積分した予測と比べる & $6\times10^{-6}$ 以内 \\
+$E=p\dot q-\Lagr$ と $T+U$ は違い得る & 回転する棒の数値解 & $E$ 一定、$T$ 増加 \\
+重心は放物線、内部は保存 & 投げた 3 質点 & $10^{-14}$、$3\times10^{-6}$ \\
+面積速度は一定 & 等時間の扇形の面積 & 一致 \\
+周期 $\propto A^{1-k/2}$ & 公式と数値解、両対数の傾き & 表~\ref{tab:periods} \\
+$2\langle T\rangle=k\langle U\rangle$ & 整数周期の時間平均 & $10^{-5}$ 以内 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{コードとの対応}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+種類 & 場所 \\
+\midrule
+設計書 & \path{docs/design/006-conservation-laws.md} \\
+物理（domain） & \path{src/physlab/domain/mechanics/} の \path{cluster.py}、\path{rotating_rod.py}、
+  \path{central.py}、\path{power_law.py} \\
+ユースケース & \path{src/physlab/application/mechanics/} の \path{symmetry.py}、\path{center_of_mass.py}、
+  \path{areal_velocity.py}、\path{similarity.py} \\
+コマンド & \code{symmetry}、\code{center-of-mass}、\code{areal-velocity}、\code{similarity} \\
+知見 & \path{docs/knowledge/conservation-laws.md} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%% ================================================================
+\section{演習}\label{sec:cons-exercises}
+
+\begin{exercise}[基礎]{cons-rod}
+回転する棒の上の質点で、運動方程式を使って $E=\tfrac12m(\dot r^2-\omega^2r^2)$ が一定であることを直接示せ。
+\end{exercise}
+
+\begin{exercise}[基礎]{cons-spring-x}
+ばねでつないだ 3 質点に、外場 $U_{\rm ext}=\tfrac12\kappa\sum m_ax_a^2$（$x$ 方向にだけ引き戻す）をかける。
+$E,P_x,P_y,L$ のうち保存するのはどれか。
+\end{exercise}
+
+\begin{exercise}[基礎]{cons-carts}
+質量 $m_1,m_2$ の 2 台の台車が、縮めたばねに押されて静止状態から離れる。
+離れた後の速さの比と、運動エネルギーの比を求めよ。
+\end{exercise}
+
+\begin{exercise}[応用]{cons-two-body-energy}
+第\ref{ch:eom}章の二体問題（$m_1=3,\ m_2=1$、$\bm V=(0.35,\,0.2)$）の内部エネルギーは $-0.75$ だった。
+式~\eqref{eq:energy-split} を使って、実験室系でのエネルギーを求めよ。
+\end{exercise}
+
+\begin{exercise}[応用]{cons-rotating-field}
+外場が一定の角速度 $\Omega$ で回る場合、$U(\rho,\varphi-\Omega t)$（$z$ 軸まわり）を考える。
+$E$ も $L_z$ も保存しないが、ある組み合わせは保存する。それを見つけよ。
+\end{exercise}
+
+\begin{exercise}[応用]{cons-scaling}
+(a) 静かに落とす高さを 4 倍にすると、落下時間は何倍か。
+(b) 万有引力で、軌道の長半径が 4 倍の惑星の公転周期は何倍か。
+\end{exercise}
+
+\begin{exercise}[応用]{cons-virial-ho}
+(a) 調和振動子 $x=A\cos\omega t$ で、$\langle T\rangle=\langle U\rangle=E/2$ を直接計算で示せ。
+(b) 万有引力の束縛運動では、$\langle T\rangle$ と $\langle U\rangle$ は $E$ でどう表されるか。
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{cons-sim-spin}
+投げるときの回転を 2 倍にすると、重心の軌道、内部エネルギー、重心まわりの角運動量はそれぞれどうなるか。
+予想してから、次を実行して確かめよ。
+\begin{terminal}
+uv run physlab run center-of-mass --spin 12 --no-video
+\end{terminal}
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{cons-sim-kepler}
+$U=-1/r$ に変えると、軌道の形と、1 区間の面積はどうなるか。
+\begin{terminal}
+uv run physlab run areal-velocity --exponent 1.0 --no-video
+\end{terminal}
+\end{exercise}
+
+%% ================================================================
+\section{まとめ}\label{sec:cons-summary}
+
+\begin{summary}
+\begin{itemize}
+  \item 保存量は対称性から出る。時間をずらす → $E$、平行移動 → $\bm P$、回転 → $\bm L$、ガリレイ変換 → $M\bm R-\bm Pt$。
+  \item $E=\sum p\dot q-\Lagr$ は、$T$ が速度の 2 次形式のときに $T+U$ に一致する。
+  \item 対称性を壊すと、対応する量が外力（外力のモーメント、$\partial U/\partial t$）の速さで変わる。
+  \item 系の運動は重心の運動と内部の運動に分けられる。一様な重力は内部に手を出さない。
+  \item 中心力では面積速度が $L/2m$ で一定。
+  \item $U$ が $k$ 次の同次関数なら、時間は大きさの $1-k/2$ 乗に比例し、時間平均で $2\langle T\rangle=k\langle U\rangle$。
+\end{itemize}
+\end{summary}
+
+\section{発展}\label{sec:cons-advanced}
+\begin{itemize}
+  \item 次の章の候補: エネルギーと角運動量を使って、1 次元運動や中心力の軌道を実際に解く（運動方程式の積分）。
+  \item ネーターの定理は、場の理論では電荷の保存などにつながる。
+  \item 回転する場の中の保存量 $E-\Omega L_z$（問~\ref{ex:cons-rotating-field}）は、
+    制限三体問題のヤコビ積分として現れる。
+\end{itemize}
+
+%% ================================================================
+\section{演習の解答}\label{sec:cons-solutions}
+
+\begin{solution}{cons-rod}
+運動方程式は $\diff{}{t}(m\dot r)-m\omega^2r=0$、すなわち $\ddot r=\omega^2r$。
+$\diff{E}{t}=m\dot r\ddot r-m\omega^2r\dot r=m\dot r(\ddot r-\omega^2r)=0$。
+\end{solution}
+
+\begin{solution}{cons-spring-x}
+外場は時間を含まないので $E$ は保存する。$y$ にずらしても変わらないので $P_y$ は保存する。
+$x$ にずらすと変わるので $P_x$ は保存しない。$x$ 方向だけを引くので回すと変わり、$L$ は保存しない。
+答え: $E$ と $P_y$。
+\end{solution}
+
+\begin{solution}{cons-carts}
+初め $P=0$ で、水平方向の外力がないので、離れた後も $m_1v_1+m_2v_2=0$。
+速さの比は $\abs{v_1}/\abs{v_2}=m_2/m_1$。運動エネルギーの比は
+$\dfrac{m_1v_1^2}{m_2v_2^2}=\dfrac{m_1}{m_2}\left(\dfrac{m_2}{m_1}\right)^2=\dfrac{m_2}{m_1}$。
+軽い台車が多くのエネルギーを持っていく。
+\end{solution}
+
+\begin{solution}{cons-two-body-energy}
+$M=4$ なので $\tfrac12MV^2=\tfrac12\cdot4\cdot(0.35^2+0.2^2)=0.325$。
+$E=0.325+(-0.75)=-0.425$。第\ref{ch:eom}章で実験室系の数値解から得た値と一致する。
+\end{solution}
+
+\begin{solution}{cons-rotating-field}
+場と一緒に回る座標 $\psi=\varphi-\Omega t$ を使うと、$\Lagr$ は $t$ を陽に含まない。
+$\Lagr=\tfrac12m\bigl(\dot\rho^2+\rho^2(\dot\psi+\Omega)^2+\dot z^2\bigr)-U(\rho,\psi,z)$ で、
+$p_\psi=m\rho^2(\dot\psi+\Omega)=L_z$。式~\eqref{eq:energy-function} の保存量は
+$\dot\rho p_\rho+\dot\psi p_\psi+\dot zp_z-\Lagr=E-\Omega L_z$（$E=T+U$）。
+つまり $E-\Omega L_z$ が保存する。
+\end{solution}
+
+\begin{solution}{cons-scaling}
+(a) $k=1$ なので $t\propto l^{1/2}$。$\sqrt4=2$ 倍。
+(b) $k=-1$ なので $t\propto l^{3/2}$。$4^{3/2}=8$ 倍。
+\end{solution}
+
+\begin{solution}{cons-virial-ho}
+(a) $T=\tfrac12m\omega^2A^2\sin^2\omega t$、$U=\tfrac12m\omega^2A^2\cos^2\omega t$。
+$\sin^2,\cos^2$ の平均はどちらも $1/2$ なので、$\langle T\rangle=\langle U\rangle=\tfrac14m\omega^2A^2=E/2$。
+(b) $k=-1$: $\langle U\rangle=2E/(k+2)=2E$、$\langle T\rangle=kE/(k+2)=-E$。束縛運動では $E<0$ である。
+\end{solution}
+
+\begin{solution}{cons-sim-spin}
+重心の軌道は変わらない（一様な重力が変えるのは重心の運動だけで、重心の初速は同じ）。
+重心まわりの角運動量は角速度に比例するので 2 倍（$11.4617\to22.9233$）。
+内部エネルギーは、ばねの分 $\tfrac12\cdot200\cdot0.15^2\times3=6.75\,\mathrm{J}$ は同じで、
+回転の運動エネルギー $34.385\,\mathrm{J}$ が $\omega^2$ に比例して 4 倍になる:
+$6.75+4\times34.385=144.29\,\mathrm{J}$。実行結果（\qty{144.2900}{J}）と一致する。
+\end{solution}
+
+\begin{solution}{cons-sim-kepler}
+万有引力では軌道が閉じた楕円になる（$r$ は $0.681$ から $1.000$、ロゼットにならない）。
+1 周の時間は \qty{4.8405}{s} で、長半径 $a=0.840$ に対するケプラーの第 3 法則 $2\pi a^{3/2}=\qty{4.8402}{s}$ と一致する。
+12 等分した 1 区間の面積は、どれも $0.18135\,\mathrm{m^2}=0.4030\times0.9/2$ で同じである。
+\end{solution}

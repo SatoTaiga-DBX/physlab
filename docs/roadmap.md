@@ -15,13 +15,17 @@
   第 3 章で実装済み。3 体問題は未着手
 - [ ] 荷電粒子の運動（ローレンツ力・サイクロトロン運動）
 
-## 1b. 解析力学（ランダウ＝リフシッツ『力学』に沿って）
+## 1b. 解析力学（ランダウ＝リフシッツ『力学』を参考に）
+
+参考書の話題の順に進めるが、構成・図・演習は独自に作る（[著作権の方針](knowledge/copyright.md)）。
 
 - [x] 第 I 章 運動方程式（§1 一般座標、§2 最小作用の原理、§3 ガリレイの相対性原理、
   §4 自由な質点のラグランジアン、§5 質点系のラグランジアン）—
   [教科書 第 3 章](textbook/tex/chapters/02-analytical-mechanics/01-equations-of-motion.tex) /
   [設計書 005](design/005-analytical-mechanics-ch1.md)
-- [ ] 第 II 章 保存則（エネルギー・運動量・角運動量、ネーターの定理）
+- [x] 第 II 章 保存法則（§6 エネルギー、§7 運動量、§8 慣性中心、§9 角運動量、§10 力学的相似）—
+  [教科書 第 4 章](textbook/tex/chapters/02-analytical-mechanics/02-conservation-laws.tex) /
+  [設計書 006](design/006-conservation-laws.md)
 - [ ] 第 III 章 運動方程式の積分（1 次元運動・中心力場・ケプラー問題）
 - [ ] 第 IV 章 粒子の衝突
 - [ ] 第 V 章 微小振動

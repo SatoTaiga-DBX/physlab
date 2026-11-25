@@ -79,6 +79,13 @@ presentation ──▶ infrastructure ──▶ application ──▶ domain | n
 - [ ] 動画のフレームと PDF のページを目視、`uv run pytest` と `uv run ruff check .` を通す
 - [ ] 知見・roadmap・各 README の一覧を更新
 
+## 参考書をもとに章を書くとき（著作権。詳細は docs/knowledge/copyright.md）
+
+- このリポジトリは**公開**している。参考書の文章・図・問題を写さない。文を追いかけた言い換えもしない。
+- 構成は自分で決め、図と数値は自分のシミュレーションで作り、演習は独自に作る。
+- 物理法則・式・導出の筋道は書いてよい。参考にした書名と節番号は出典として示す。
+- push の前に上の 3 点と個人情報の混入を確認する。
+
 ## 規約
 
 - 単位は SI（m, kg, s, rad）。角度の度数表記は入出力の境界（presentation）でのみ使う。
@@ -86,6 +93,8 @@ presentation ──▶ infrastructure ──▶ application ──▶ domain | n
   安易に `solve_ivp` へ置き換えない（必要になったら併用を設計書で決める）。
 - matplotlib は Agg 固定（`infrastructure/rendering/style.setup_matplotlib()` を図の作成前に呼ぶ）。
 - 動画は実時間と一致させる（k コマ目の時刻 k/fps に最も近い計算ステップを使う）。
+  現象が短すぎてスロー再生にする場合は、倍率を**画面に表示**する。
+- 教科書の図を作る `figures()` は**引数を取らない**（コマンドの引数を変えても図が別の条件で上書きされないように）。
 - テストは `--import-mode=importlib`（同名ファイル可）。テストファイル同士は import できないので、
   共有は `tests/conftest.py` のフィクスチャで行う。テストは `PHYSLAB_OUTPUT_DIR` を tmp に向けるので
   `outputs/` を汚さない。

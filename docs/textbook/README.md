@@ -28,20 +28,21 @@ uv run physlab run textbook        # 図の生成 → PDF → 検査。outputs/t
 | 第 1 章 | 微分方程式と数値積分 | [tex](tex/chapters/00-foundations/01-ode-and-numerical-integration.tex) | `pendulum`（積分法の比較） | 執筆済み |
 | **第 II 部 力学の入口** | | | | |
 | 第 2 章 | 単振り子 | [tex](tex/chapters/01-mechanics/01-pendulum.tex) | `pendulum` | 執筆済み |
-| **第 III 部 解析力学（ランダウ＝リフシッツ『力学』に沿って）** | | | | |
-| 第 3 章 | 運動方程式（§1 一般座標 〜 §5 質点系のラグランジアン） | [tex](tex/chapters/02-analytical-mechanics/01-equations-of-motion.tex) | `generalized-coordinates`、`least-action`、`galilean` | 執筆済み |
-| 第 4 章 | 保存則（エネルギー・運動量・角運動量、ネーターの定理） | | （予定） | 未着手 |
+| **第 III 部 解析力学**（参考: ランダウ＝リフシッツ『力学』） | | | | |
+| 第 3 章 | 運動方程式（参考: §1 一般座標 〜 §5 質点系のラグランジアン） | [tex](tex/chapters/02-analytical-mechanics/01-equations-of-motion.tex) | `generalized-coordinates`、`least-action`、`galilean` | 執筆済み |
+| 第 4 章 | 保存法則（参考: §6 エネルギー 〜 §10 力学的相似） | [tex](tex/chapters/02-analytical-mechanics/02-conservation-laws.tex) | `symmetry`、`center-of-mass`、`areal-velocity`、`similarity` | 執筆済み |
 | 第 5 章 | 運動方程式の積分（1 次元運動、中心力場、ケプラー問題） | | （予定） | 未着手 |
 | 第 6 章 | 微小振動 | | （予定） | 未着手 |
 | 第 7 章 | 正準方程式 | | （予定） | 未着手 |
 | **波動・流体** | （予定: 弦の振動、干渉、回折、拡散、移流、ナビエ–ストークス） | | | 未着手 |
 
-第 4 章以降は、ランダウ＝リフシッツ『力学』の第 II 章以降を想定した並び（章立ては原典で確認する）。
+第 5 章以降は、ランダウ＝リフシッツ『力学』の第 III 章以降の話題を想定した並び（章立ては原典で確認する）。
 題材の候補は [../roadmap.md](../roadmap.md)。
 
-> **著作物について**: 第 3 章は、ランダウ＝リフシッツ『力学』第 I 章の内容を筆者が自分の言葉で書き直し、
-> 図とシミュレーションを足したものである。文章・式の並びは原典の転載ではない。
-> 書誌は `tex/chapters/bibliography.tex`。必ず原典と読み比べること。
+> **著作物について**: 解析力学の部は、ランダウ＝リフシッツ『力学』が扱う話題を参考にした**学習ノート**で、
+> 同書の解説書ではない。同書の文章・図・問題を写して作ったものではなく、図は本プロジェクトのコードで作り、
+> 演習は独自に用意している。原稿は生成 AI（Claude）の支援で書いており、原典との照合はしていない。
+> 考え方と根拠は [../knowledge/copyright.md](../knowledge/copyright.md)、書誌は `tex/chapters/bibliography.tex`。
 
 ## 読み方
 
