@@ -21,6 +21,7 @@
 | [第 2 章](textbook/tex/chapters/01-mechanics/01-pendulum.tex) | 単振り子 |
 | [第 3 章](textbook/tex/chapters/02-analytical-mechanics/01-equations-of-motion.tex) | 運動方程式（参考: ランダウ＝リフシッツ『力学』§1–§5） |
 | [第 4 章](textbook/tex/chapters/02-analytical-mechanics/02-conservation-laws.tex) | 保存法則と力学的相似（参考: 同 §6–§10） |
+| [第 5 章](textbook/tex/chapters/02-analytical-mechanics/03-collisions.tex) | 衝突と散乱（参考: 同 §16–§20） |
 
 PDF の作り方・目次・書き方は [textbook/README.md](textbook/README.md)。
 
@@ -35,6 +36,7 @@ PDF の作り方・目次・書き方は [textbook/README.md](textbook/README.md
 | [004](design/004-tex-textbook.md) | 教科書の TeX 化と PDF ビルド（`physlab run textbook`） | 実装済み・検証済み |
 | [005](design/005-analytical-mechanics-ch1.md) | 解析力学入門（ランダウ＝リフシッツ第 I 章）のシミュレーション | 実装済み・検証済み |
 | [006](design/006-conservation-laws.md) | 保存法則と力学的相似のシミュレーション | 実装済み・検証済み |
+| [007](design/007-collisions.md) | 粒子の衝突・崩壊・散乱、ラザフォードの公式、微小角散乱 | 実装済み・検証済み |
 
 ## 知見 (`knowledge/`)
 
@@ -46,6 +48,7 @@ PDF の作り方・目次・書き方は [textbook/README.md](textbook/README.md
 | [analytical-mechanics.md](knowledge/analytical-mechanics.md) | 最小作用の原理・一般座標・ガリレイ変換のシミュレーションの実測値と、ハマった点 |
 | [latex-textbook.md](knowledge/latex-textbook.md) | LuaLaTeX（MiKTeX）で日本語の教科書を組むときの設定・警告・ハマった点 |
 | [conservation-laws.md](knowledge/conservation-laws.md) | 対称性と保存量・積分法・力学的相似の実測値と分かったこと |
+| [collisions.md](knowledge/collisions.md) | 衝突と散乱の実測値と、求積・可視化でハマった点 |
 | [copyright.md](knowledge/copyright.md) | 参考書をもとに教科書を書くときの著作権の調査と方針 |
 
 ## 書き方のルール

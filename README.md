@@ -15,6 +15,7 @@ uv run physlab list              # 実行できるコマンド一覧
 uv run physlab run pendulum      # 単振り子を実行 → outputs/mechanics/ に動画と図
 uv run physlab run pendulum --theta0-deg 30   # 引数でパラメータを変えられる
 uv run physlab run least-action  # 最小作用の原理（作用の地形、経路が真の運動に収束する動画）
+uv run physlab run rutherford    # ラザフォード散乱（打ち込んで数える。ほかに decay、scattering など）
 uv run physlab run textbook      # 教科書を PDF にする → outputs/textbook/physlab-textbook.pdf
 uv run pytest                    # テスト（層の依存ルールの検査を含む）
 ```
@@ -22,7 +23,7 @@ uv run pytest                    # テスト（層の依存ルールの検査を
 出力（動画・図・PDF）は `outputs/` に保存される。`outputs/` は Git 管理外（再生成できるため）。
 教科書は **LaTeX** で書いてあり、PDF にして読む（初回だけ `winget install MiKTeX.MiKTeX`）。
 読み方と目次は [教科書](docs/textbook/README.md)。最初は第 1 章・第 2 章、解析力学は第 3 章から
-（最小作用の原理、第 4 章の保存法則などを図とシミュレーションで見る）。
+（最小作用の原理、第 4 章の保存法則、第 5 章の衝突と散乱などを図とシミュレーションで見る）。
 教科書は個人の学習ノートで、参考文献の解説書ではない（[著作権の方針](docs/knowledge/copyright.md)）。
 
 ## ディレクトリ構成
