@@ -29,6 +29,19 @@ EXPECTED_FIGURES = {
     "sim-periods",
     "sim-collapse",
     "sim-virial",
+    "dec-velocity",
+    "dec-distributions",
+    "col-momentum",
+    "col-trajectories",
+    "col-mass-ratio",
+    "sca-deflection",
+    "sca-cross-section",
+    "sca-lab-frame",
+    "rut-orbits",
+    "rut-cross-section",
+    "rut-charge-size",
+    "sma-impulse",
+    "sma-error",
 }
 
 
@@ -36,6 +49,7 @@ def test_new_commands_are_discovered_and_provide_figures() -> None:
     names = set(discover())
     assert {"least-action", "generalized-coordinates", "galilean", "figures", "textbook"} <= names
     assert {"symmetry", "center-of-mass", "areal-velocity", "similarity"} <= names
+    assert {"decay", "elastic-collision", "scattering", "rutherford", "small-angle"} <= names
     assert set(figure_providers()) == {
         "pendulum",
         "least-action",
@@ -45,6 +59,11 @@ def test_new_commands_are_discovered_and_provide_figures() -> None:
         "center-of-mass",
         "areal-velocity",
         "similarity",
+        "decay",
+        "elastic-collision",
+        "scattering",
+        "rutherford",
+        "small-angle",
     }
 
 

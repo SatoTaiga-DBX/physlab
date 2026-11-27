@@ -1,6 +1,6 @@
 # ロードマップ
 
-取り組む題材の候補と進捗。順序・内容は気分と興味で入れ替えてよい（更新日: 2026-11-23）。
+取り組む題材の候補と進捗。順序・内容は気分と興味で入れ替えてよい（更新日: 2026-11-28）。
 着手するときは教科書の章 (`textbook/tex/`) と設計書 (`design/NNN-名前.md`) を先に書く。
 
 ## 1. 力学（まずここから）
@@ -27,7 +27,10 @@
   [教科書 第 4 章](textbook/tex/chapters/02-analytical-mechanics/02-conservation-laws.tex) /
   [設計書 006](design/006-conservation-laws.md)
 - [ ] 第 III 章 運動方程式の積分（1 次元運動・中心力場・ケプラー問題）
-- [ ] 第 IV 章 粒子の衝突
+- [x] 第 IV 章 粒子の衝突（§16 粒子の崩壊、§17 弾性衝突、§18 散乱、§19 ラザフォードの公式、
+  §20 微小角散乱）—
+  [教科書 第 5 章](textbook/tex/chapters/02-analytical-mechanics/03-collisions.tex) /
+  [設計書 007](design/007-collisions.md)
 - [ ] 第 V 章 微小振動
 - [ ] 第 VI 章 剛体の運動
 - [ ] 第 VII 章 正準方程式（位相空間・ハミルトン形式）

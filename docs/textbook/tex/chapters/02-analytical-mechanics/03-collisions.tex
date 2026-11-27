@@ -1,0 +1,983 @@
+\chapter{衝突と散乱}\label{ch:coll}
+\chapterinfo{★★★}{約 180 分}{2026-11-28}
+\correspondsto{ランダウ＝リフシッツ『力学』\cite{ll-mech} 第 IV 章 §16〜§20}
+
+\begin{objectives}
+\begin{enumerate}
+  \item 保存則だけから、崩壊と弾性衝突の結果が取り得る範囲を導ける。
+  \item 重心系と実験室系を行き来して、角度とエネルギーを計算できる。
+  \item 散乱の断面積を定義し、衝突パラメータと散乱角の関係から求められる。
+  \item 中心力の散乱角を、軌道の積分として書ける（剛体球、クーロン力）。
+  \item ラザフォードの公式を導き、「電荷が一点に集まっている」ことをどう確かめられるか説明できる。
+  \item 小さな角の散乱を、直線に沿った力積で見積もれる。
+\end{enumerate}
+\end{objectives}
+
+\begin{note}
+この章は、ランダウ＝リフシッツ『力学』\cite{ll-mech} 第 IV 章が扱う話題を参考に、
+「力を知らなくても分かること」と「力を知らないと分からないこと」を分ける数値実験を軸にして
+書き下ろした学習ノートである。構成・図・演習は独自のもので、同書の文章・図・問題を写したものではない
+（原典との照合はしていない）。節の見出しの下の対応は、原典と読み比べるための道しるべである。
+\end{note}
+
+\paragraph{前提}
+第\ref{ch:cons}章（エネルギー・運動量・角運動量の保存、重心系）と、
+第\ref{ch:eom}章（二体問題を相対運動に分ける考え方）。
+中心力の軌道の積分は、まだ章として扱っていないので、この章の\ref{sec:coll-orbit}節で必要な分だけ導く。
+
+%% ================================================================
+\section{導入：途中を見なくても言えること}\label{sec:coll-intro}
+
+ビリヤードの球がぶつかる。放射性の原子核が割れる。原子に向けて撃った粒子が跳ね返る。
+どれも、近づいている間の力は強く、複雑で、直接は見えないことが多い。
+観測できるのは、\textbf{十分に離れた前と後}の粒子だけである。
+
+この章の問いは、「\textbf{結果のうち、どこまでが保存則で決まり、どこからが力で決まるのか}」である。
+答えを先に言うと、次のようになる。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lLl@{}}
+\toprule
+段階 & 分かること & 節 \\
+\midrule
+保存則だけ & 速さの関係、飛び出せる向きの範囲、運動量が乗る円 & \ref{sec:coll-decay}、\ref{sec:coll-elastic} \\
+力を指定する & どの向きに、どれだけの割合で出るか（断面積） & \ref{sec:coll-scattering}、\ref{sec:coll-rutherford} \\
+力が弱い・遠い & 積分を直線の上で済ませる近似 & \ref{sec:coll-small} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+この章で使う記号を先にまとめておく。
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+記号 & 意味 \\
+\midrule
+$\mu=m_1m_2/(m_1+m_2)$ & 換算質量 \\
+$\bm V$ & 重心（崩壊では親の粒子）の速度 \\
+$\chi$ & 重心系で相対速度が回る角（散乱角） \\
+$\theta_1,\theta_2$ & 実験室系で、入射粒子・標的が出ていく角（入射の向きから測る） \\
+$\rho$ & 衝突パラメータ（力が働かないとしたときの、中心とのずれ） \\
+$v_\infty$、$E=\tfrac12\mu v_\infty^2$ & 十分に離れたときの相対速度の大きさ、相対運動のエネルギー \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%% ================================================================
+\section{粒子の崩壊}\label{sec:coll-decay}
+\correspondsto{ランダウ＝リフシッツ §16}
+
+\subsection{静止している粒子が 2 つに分かれる}
+
+静止していた粒子が、質量 $m_1,m_2$ の 2 つに分かれ、内部に蓄えていたエネルギーのうち $\varepsilon$ が
+運動エネルギーになるとする。はじめの運動量は 0 だから、2 つの破片の運動量は大きさが等しく向きが逆である。
+その大きさを $p_0$ とすると、エネルギーの保存から
+\begin{equation}
+  \varepsilon=\frac{p_0^2}{2m_1}+\frac{p_0^2}{2m_2}=\frac{p_0^2}{2\mu},
+  \qquad p_0=\sqrt{2\mu\varepsilon}.
+  \label{eq:decay-p0}
+\end{equation}
+速さは $v_{10}=p_0/m_1$、$v_{20}=p_0/m_2$ で、\textbf{一意に決まる}。決まらないのは向きだけである。
+運動エネルギーの分け前は
+\begin{equation}
+  T_{10}=\frac{p_0^2}{2m_1}=\frac{m_2}{m_1+m_2}\,\varepsilon,\qquad
+  T_{20}=\frac{m_1}{m_1+m_2}\,\varepsilon
+\end{equation}
+で、軽いほうが多くを持っていく。
+
+\subsection{動いている粒子の崩壊：速度の図}
+
+親が速度 $\bm V$ で動いていた場合は、親が静止して見える系に移れば、今の結果がそのまま使える
+（第\ref{ch:eom}章のガリレイの相対性原理）。以下、破片の一方に注目し、静止系での速さを $v_0$、
+向きを単位ベクトル $\bm n$ とする。実験室系の速度は
+\begin{equation}
+  \bm v=\bm V+v_0\bm n .
+\end{equation}
+$\bm n$ はあらゆる向きを取るので、$\bm v$ の先端は、中心が $\bm V$、半径 $v_0$ の球面（図では円）の上にある。
+
+\physfig[0.97]{dec-velocity}{破片の速度は、$\bm V$ の先を中心とする半径 $v_0$ の円の上にある。
+$V<v_0$ ならすべての向きに速度がある。$V>v_0$ なら原点が円の外に出て、接線（破線）の内側にしか飛べない。
+同じ向き（緑の直線）に、速さの違う 2 つの解がある。}{dec-velocity}
+
+親の進行方向から測った実験室系の角を $\theta$、静止系の角を $\theta_0$ とする。成分に分けると
+$v\cos\theta=V+v_0\cos\theta_0$、$v\sin\theta=v_0\sin\theta_0$ なので
+\begin{equation}
+  \tan\theta=\frac{\sin\theta_0}{\cos\theta_0+k},\qquad k=\frac{V}{v_0}.
+  \label{eq:decay-angle}
+\end{equation}
+また $\bm v_0=\bm v-\bm V$ の長さを書くと $v_0^2=v^2+V^2-2vV\cos\theta$。これを $v$ について解くと
+\begin{equation}
+  v=V\cos\theta\pm\sqrt{v_0^2-V^2\sin^2\theta}.
+  \label{eq:decay-speed}
+\end{equation}
+
+\begin{result}{崩壊の破片が飛べる向き}{decay-cone}
+\begin{itemize}
+  \item $V<v_0$: どの向き $\theta$ にも飛べる。速さは式~\eqref{eq:decay-speed} の $+$ の 1 つ。
+  \item $V>v_0$: 根号が実数である範囲だけ、すなわち
+  \begin{equation}
+    \theta\le\theta_{\max},\qquad\sin\theta_{\max}=\frac{v_0}{V}.
+    \label{eq:decay-thmax}
+  \end{equation}
+  この円すいの内側の各向きに、速さが 2 通りある。
+\end{itemize}
+\end{result}
+
+\begin{intuition}
+高速で動く車から、あらゆる向きに同じ速さでボールを投げる。車がボールより速ければ、
+後ろに向けて投げたボールも、地面から見れば前に進む。どのボールも車の前方の円すいから出られない。
+\end{intuition}
+
+\subsection{向きの分布}\label{sec:decay-distribution}
+
+崩壊の向きが静止系で等方的（どの向きも同じ確からしさ）だとする。
+静止系で角が $\theta_0$ から $\theta_0+\dd\theta_0$ の間に出る確率は、球面の帯の面積を全面積で割って
+\begin{equation}
+  \frac{2\pi\sin\theta_0\,\dd\theta_0}{4\pi}=\frac12\abs{\dd\cos\theta_0}.
+\end{equation}
+実験室系の角に直すには、$\cos\theta_0$ を $\theta$ で表せばよい。
+$\cos\theta_0=(v\cos\theta-V)/v_0$ に式~\eqref{eq:decay-speed} を入れて
+\begin{equation}
+  \cos\theta_0=-k\sin^2\theta\pm\cos\theta\sqrt{1-k^2\sin^2\theta}.
+\end{equation}
+微分する。第 1 項は $-2k\sin\theta\cos\theta$、第 2 項の根号の部分は
+\begin{equation}
+  \diff{}{\theta}\Bigl(\cos\theta\sqrt{1-k^2\sin^2\theta}\Bigr)
+  =-\sin\theta\,\frac{(1-k^2\sin^2\theta)+k^2\cos^2\theta}{\sqrt{1-k^2\sin^2\theta}}
+  =-\sin\theta\,\frac{1+k^2\cos2\theta}{\sqrt{1-k^2\sin^2\theta}} .
+\end{equation}
+よって
+\begin{equation}
+  \diff{\cos\theta_0}{\theta}=-\sin\theta\,(A\pm B),\qquad
+  A=2k\cos\theta,\quad B=\frac{1+k^2\cos2\theta}{\sqrt{1-k^2\sin^2\theta}} .
+\end{equation}
+$k<1$ では $+$ の枝だけなので、確率密度は $\tfrac12\sin\theta\,(A+B)$。
+$k>1$ では 2 つの枝の絶対値を足す。展開すると $B^2-A^2=(1-k^2)^2/(1-k^2\sin^2\theta)\ge0$ なので
+$B\ge\abs{A}$ であり、$\abs{A+B}+\abs{A-B}=2B$ となる。
+
+\begin{result}{実験室系の角の分布（静止系で等方的な崩壊）}{decay-density}
+\begin{equation}
+  P(\theta)\,\dd\theta=
+  \begin{cases}
+    \dfrac12\sin\theta\left[2k\cos\theta+\dfrac{1+k^2\cos2\theta}{\sqrt{1-k^2\sin^2\theta}}\right]\dd\theta
+      & (k<1,\ 0\le\theta\le\pi)\\[1.2em]
+    \sin\theta\,\dfrac{1+k^2\cos2\theta}{\sqrt{1-k^2\sin^2\theta}}\,\dd\theta
+      & (k>1,\ 0\le\theta<\theta_{\max})
+  \end{cases}
+  \label{eq:decay-density}
+\end{equation}
+\end{result}
+
+$k=0$ では $\tfrac12\sin\theta$（等方的）に戻る。$k>1$ では $\theta\to\theta_{\max}$ で密度が無限大になる。
+$\theta_0$ を変えても $\theta$ がほとんど動かない場所に、多くの向きが重なるためである。
+ただし積分すれば有限で、全体の積分は 1 である。
+
+\subsection{エネルギーの分布}
+
+実験室系の運動エネルギーは
+\begin{equation}
+  T=\tfrac12m\abs{\bm V+v_0\bm n}^2=\tfrac12m\left(V^2+v_0^2+2Vv_0\cos\theta_0\right).
+  \label{eq:decay-energy}
+\end{equation}
+$T$ は $\cos\theta_0$ の 1 次式で、等方的なら $\cos\theta_0$ は $-1$ から $1$ まで一様に分布する。したがって、
+
+\begin{result}{崩壊の破片のエネルギーは一様に分布する}{decay-flat}
+静止系で等方的な 2 体崩壊では、実験室系の運動エネルギーは
+$\tfrac12m(V-v_0)^2$ から $\tfrac12m(V+v_0)^2$ までの間に\textbf{一様に}分布する。
+\end{result}
+
+\subsection{シミュレーションで確かめる}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run decay      # 図 2 枚と動画（outputs/mechanics/decay_cone.mp4）
+\end{terminal}
+乱数で向きを選んで \num{200000} 回崩壊させる。実験室系の量は 3 次元の速度ベクトルの足し算で求め、
+式~\eqref{eq:decay-density} は使わない。
+\end{simbox}
+
+設定は $m_1=\qty{1}{kg}$、$m_2=\qty{3}{kg}$、$\varepsilon=\qty{24}{J}$ で、
+$p_0=\qty{6}{kg.m/s}$、$v_{10}=\qty{6}{m/s}$ である。親の速さは $V=3,\ \qty{12}{m/s}$（$k=0.5,\ 2$）。
+
+\physfig[0.97]{dec-distributions}{左: 破片 1 の向きの分布（縦軸は対数）。$k=2$ は \ang{30} の内側に集まる。
+右: 運動エネルギーの分布は平ら。点が乱数実験、線が理論。}{dec-distributions}
+
+\begin{itemize}
+  \item $k=2$ の実測の最大の角は \ang{30.00}（式~\eqref{eq:decay-thmax} は $\arcsin\tfrac12=\ang{30}$）。
+  \item $k=0.5$ で前方（\ang{90} 未満）に出る割合は 0.7507。理論は $\cos\theta_0>-k$ となる割合 $(1+k)/2=0.75$。
+  \item 運動エネルギーの平均は \qty{22.494}{J} と \qty{89.974}{J}。理論 $\tfrac12m(V^2+v_0^2)$ は
+    \qty{22.5}{J} と \qty{90}{J}。
+  \item 区間ごとの理論とのずれは、統計誤差の 3.1 倍以内。1 回ごとの運動量とエネルギーの保存は丸め誤差で成り立つ。
+\end{itemize}
+
+\subsection{3 つ以上に分かれる場合}
+
+3 つ以上に分かれると、保存則（運動量 3 成分とエネルギー）だけでは速さが決まらず、連続的な値を取る。
+それでも上限はある。質量 $m$ の破片 1 つに注目し、残り（全質量 $M-m$）をひとまとめにする。
+注目する破片の運動量を $\bm p$ とすると、残りの全運動量は $-\bm p$ で、
+その運動エネルギーは「ひとかたまりの運動」$p^2/2(M-m)$ と「内部の運動」の和である（式~\eqref{eq:energy-split}）。
+内部の運動は 0 以上なので
+\begin{equation}
+  \varepsilon\ge\frac{p^2}{2m}+\frac{p^2}{2(M-m)}
+  \quad\Longrightarrow\quad
+  T=\frac{p^2}{2m}\le\frac{M-m}{M}\,\varepsilon .
+  \label{eq:many-body-max}
+\end{equation}
+等号は、残りが互いに静止したまま、そろって反対向きに飛ぶときに成り立つ。
+
+%% ================================================================
+\section{弾性衝突}\label{sec:coll-elastic}
+\correspondsto{ランダウ＝リフシッツ §17}
+
+\subsection{重心系では、向きが変わるだけ}
+
+粒子の内部の状態が変わらない衝突を\textbf{弾性衝突}という。このとき運動エネルギーの和も保存する。
+重心の速度 $\bm V=(m_1\bm v_1+m_2\bm v_2)/(m_1+m_2)$ は衝突の前後で変わらない。
+重心系では、2 つの運動量は大きさが等しく向きが逆で、大きさは $\mu v$（$v=\abs{\bm v_1-\bm v_2}$）である。
+エネルギーは $\mu v^2/2$ で、これが保存するから、$v$ は変わらない。
+\textbf{変われるのは相対速度の向きだけ}である。衝突後の相対速度の向きを単位ベクトル $\bm n_0$ とすると
+\begin{equation}
+  \bm v_1'=\bm V+\frac{m_2}{m_1+m_2}v\,\bm n_0,\qquad
+  \bm v_2'=\bm V-\frac{m_1}{m_1+m_2}v\,\bm n_0 .
+  \label{eq:elastic-v}
+\end{equation}
+保存則はここまでしか決めない。$\bm n_0$ を決めるのは、力の形と衝突の仕方である。
+
+\subsection{運動量の円}
+
+以下、標的（粒子 2）が静止しているとする。$\bm n_0$ が入射の向きから角 $\chi$ だけ回っているとすると、
+式~\eqref{eq:elastic-v} から標的の運動量は
+\begin{equation}
+  \bm p_2'=\mu v\,(1-\cos\chi,\ -\sin\chi),\qquad\bm p_1'=\bm p_1-\bm p_2' .
+  \label{eq:elastic-p2}
+\end{equation}
+
+\begin{result}{衝突後の運動量は円の上にある}{momentum-circle}
+静止した標的との弾性衝突では、衝突後の標的の運動量は、中心 $(\mu v,\,0)$、半径 $\mu v$ の円の上にある。
+力の形には依らない。力が決めるのは、円の上のどこになるか（$\chi$）だけである。
+\end{result}
+
+\subsection{実験室系の角と速さ}
+
+式~\eqref{eq:elastic-p2} と $\bm p_1'$ から、
+\begin{equation}
+  \tan\theta_1=\frac{m_2\sin\chi}{m_1+m_2\cos\chi},\qquad
+  \theta_2=\frac{\pi-\chi}{2}.
+  \label{eq:elastic-angles}
+\end{equation}
+（$\theta_2$ は $\tan\theta_2=\sin\chi/(1-\cos\chi)=\cot(\chi/2)$ から出る。）速さは
+\begin{equation}
+  v_1'=\frac{\sqrt{m_1^2+m_2^2+2m_1m_2\cos\chi}}{m_1+m_2}\,v,\qquad
+  v_2'=\frac{2m_1}{m_1+m_2}\,v\sin\frac\chi2 .
+  \label{eq:elastic-speeds}
+\end{equation}
+
+式~\eqref{eq:elastic-angles} の $\theta_1$ は、崩壊の式~\eqref{eq:decay-angle} で
+$\theta_0=\chi$、$k=m_1/m_2$ としたものと同じである。重心系で「重心の速度 $V$」と
+「粒子 1 の速さ $v_{10}$」の比が $m_1/m_2$ だからである。崩壊で見たことが、そのまま言える。
+\begin{itemize}
+  \item $m_1<m_2$: 入射粒子はどの向きにも跳ね返れる。
+  \item $m_1=m_2$: $\theta_1=\chi/2$ なので $\theta_1+\theta_2=\pi/2$。2 つは\textbf{直角}に分かれる。
+  \item $m_1>m_2$: 入射粒子の曲がる角には上限があり、$\sin\theta_{1\max}=m_2/m_1$。
+    重い球は、軽い球に大きくは曲げられない。
+\end{itemize}
+
+\subsection{渡るエネルギー}
+
+式~\eqref{eq:elastic-speeds} から、標的に渡るエネルギーの割合は
+\begin{equation}
+  \frac{E_2'}{E_1}=\frac{m_2v_2'^2}{m_1v^2}=\frac{4m_1m_2}{(m_1+m_2)^2}\sin^2\frac\chi2 .
+  \label{eq:energy-transfer}
+\end{equation}
+最大は正面衝突（$\chi=\pi$）で、$m_1=m_2$ のときだけ全部が渡る。
+中性子（質量比で 1）の正面衝突では、水素で 1.000、重水素で 0.889、炭素で 0.284、鉛で 0.019 である。
+原子炉で中性子を減速するのに軽い原子核が使われるのは、このためである（問~\ref{ex:coll-moderation}）。
+
+\subsection{シミュレーションで確かめる：力を変えても同じ円}
+
+「力に依らない」という主張は、力を変えて衝突させれば試せる。
+形のまったく違う短距離の斥力を 4 つ用意し、2 粒子の運動方程式を速度ベルレ法で解いた。
+柔らかい円板 $\tfrac12\cdot4(1-r)^2$（$r<1$）、ガウス型 $\ee^{-(r/0.8)^2}$、
+湯川型 $\ee^{-r/0.6}/r$、急な芯 $0.1/r^{12}$ である。
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run elastic-collision      # 図 3 枚と動画
+\end{terminal}
+動画 \path{elastic_collision.mp4} の右端は運動量の平面である。衝突の間、標的の運動量は円の内側を通り、
+離れると円の上で止まる。
+\end{simbox}
+
+\physfig[0.98]{col-momentum}{衝突パラメータを変えた 13 通り $\times$ 4 種類の力。塗りつぶしが標的の $\bm p_2'$、
+白抜きが入射粒子の $\bm p_1'$。実線は標的の円、点線は入射粒子の円。どの力も同じ円に乗る。}{col-momentum}
+
+\physfig[0.97]{col-trajectories}{同じ衝突パラメータ $\rho=\qty{0.6}{m}$、$m_2/m_1=2$ の軌道。
+曲がる角は力によって違う。重心系では、2 つの粒子が正反対の向きに出ていく。}{col-trajectories}
+
+\begin{table}[htbp]
+\centering
+\caption{$m_1=1$、$m_2=2$、$v=1$、$\rho=0.6$ の衝突（実測）}\label{tab:coll-forces}
+\begin{tabular}{lccccc}
+\toprule
+力 & $\chi$ & $\theta_1$ & $\theta_2$ & $E_2'/E_1$ & 円からのずれ \\
+\midrule
+柔らかい円板 & \ang{56.01} & \ang{38.05} & \ang{62.00} & 0.1960 & $9\times10^{-7}$ \\
+ガウス型     & \ang{82.77} & \ang{57.76} & \ang{48.61} & 0.3885 & $2\times10^{-16}$ \\
+湯川型       & \ang{75.17} & \ang{51.98} & \ang{52.41} & 0.3307 & $2\times10^{-7}$ \\
+急な芯       & \ang{91.76} & \ang{64.85} & \ang{44.12} & 0.4581 & $1\times10^{-12}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\physfig[0.97]{col-mass-ratio}{左: 重心系の角 $\chi$ と実験室系の角 $\theta_1$。$m_2/m_1=0.5$ では上限 \ang{30} がある。
+右: 正面衝突で渡るエネルギーの割合。質量が等しいときに最大になる。}{col-mass-ratio}
+
+全部の衝突で、円からのずれは $2\times10^{-6}$ 以下だった。
+柔らかい円板などに残るずれは、刻み幅による積分の誤差と、終了時刻にもわずかに残る力の影響である。
+
+%% ================================================================
+\section{散乱と断面積}\label{sec:coll-scattering}
+\correspondsto{ランダウ＝リフシッツ §18}
+
+次は、力を指定して $\chi$ を実際に決める。第\ref{ch:eom}章で見たように、2 体の相対運動は、
+換算質量 $\mu$ の 1 つの粒子が固定した中心のまわりを動く問題と同じである。
+その粒子の向きが変わる角が、そのまま重心系の $\chi$ になる。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.85,>={Stealth[length=2mm]}]
+  % クーロン斥力の軌道（d = 1.6、ρ = 1.2 の双曲線）
+  \def\periangle{123.69}
+  \draw[dashed,black!40] (-6,0) -- (4,0);
+  \draw[very thick,plblue,domain=-42:42,samples=90,smooth,variable=\s]
+    plot ({cos(\periangle+\s)/(-0.5556+1.0015*cos(\s))},
+          {sin(\periangle+\s)/(-0.5556+1.0015*cos(\s))});
+  % 漸近線
+  \draw[dashed] (-6,1.2) -- (1.2,1.2);
+  \draw[dashed] ($(-1.1077,0.4615)+(-0.3,-0.72)$) -- ($(-1.1077,0.4615)+(2.1,5.04)$);
+  % 衝突パラメータ
+  \draw[<->] (-4.6,0) -- node[left]{$\rho$} (-4.6,1.2);
+  % 散乱角
+  \draw[->] (0.25,1.2) arc (0:67.38:1.05);
+  \node at (0.6,1.9) {$\chi$};
+  % 最接近と φ0
+  \draw[black!60] (0,0) -- (123.69:2.243);
+  \node[right,black!70] at (123.69:1.0) {$r_{\min}$};
+  \draw (123.69:0.45) arc (123.69:180:0.45);
+  \node at (152:0.76) {$\varphi_0$};
+  \draw[->,plblue] (-5.8,1.45) -- node[above]{$v_\infty$} (-4.9,1.45);
+  \fill[plred] (0,0) circle (3pt) node[below right]{力の中心};
+\end{tikzpicture}
+\caption{散乱の記号。軌道は、最接近の点を通る直線について対称である。
+入射と出射の漸近線は、どちらも中心から $\rho$ だけ離れている。}\label{fig:coll-geometry}
+\end{figure}
+
+\subsection{断面積という量}
+
+実験では、1 個の粒子の衝突パラメータを選んで撃つことはできない。
+同じ速さの粒子の束を一様に当てて、どの向きに何個出たかを数える。
+単位時間・単位面積あたりに入射する粒子数を $n$、単位時間に散乱角が $\chi$ から $\chi+\dd\chi$ の間に
+出る粒子数を $\dd N$ とする。
+
+\begin{defn}{散乱の断面積}{cross-section}
+\begin{equation}
+  \dd\sigma=\frac{\dd N}{n}
+\end{equation}
+は面積の次元を持ち、\textbf{微分断面積}という。立体角 $\dd\Omega=2\pi\sin\chi\,\dd\chi$ あたりで表した
+$\dd\sigma/\dd\Omega$ がよく使われる。全部の向きで積分した $\sigma$ を全断面積という。
+\end{defn}
+
+$\chi$ が $\rho$ の単調な関数なら、$\chi$ と $\chi+\dd\chi$ の間に出るのは、
+半径 $\rho(\chi)$ と $\rho(\chi+\dd\chi)$ の間の円環を通った粒子である。よって
+$\dd\sigma=2\pi\rho\,\abs{\dd\rho}$、すなわち
+\begin{equation}
+  \dd\sigma=2\pi\rho(\chi)\abs{\diff{\rho}{\chi}}\dd\chi,\qquad
+  \diff{\sigma}{\Omega}=\frac{\rho}{\sin\chi}\abs{\diff{\rho}{\chi}} .
+  \label{eq:cross-section}
+\end{equation}
+同じ $\chi$ に出る $\rho$ が複数ある場合は、それぞれの円環の分を足し合わせる。
+
+\subsection{準備：中心力の軌道の積分}\label{sec:coll-orbit}
+
+中心力 $U(r)$ では、エネルギーと角運動量が保存する。十分に離れたところの値で書くと
+\begin{equation}
+  E=\tfrac12\mu\left(\dot r^2+r^2\dot\varphi^2\right)+U(r)=\tfrac12\mu v_\infty^2,\qquad
+  L=\mu r^2\abs{\dot\varphi}=\mu\rho v_\infty .
+\end{equation}
+第 2 式の $\dot\varphi=\rho v_\infty/r^2$ を第 1 式に入れて $\dot r$ について解くと
+\begin{equation}
+  \dot r=\pm v_\infty\sqrt{1-\frac{\rho^2}{r^2}-\frac{U(r)}{E}} .
+\end{equation}
+軌道の形は $\abs{\dd\varphi/\dd r}=\abs{\dot\varphi/\dot r}$ で決まる。$u=1/r$（$\dd u=-\dd r/r^2$）に置き換えると、
+\begin{equation}
+  \abs{\dd\varphi}=\frac{\rho\,\dd u}{\sqrt{F(u)}},\qquad
+  F(u)=1-\rho^2u^2-\frac{U(1/u)}{E}.
+  \label{eq:orbit-F}
+\end{equation}
+
+\begin{result}{中心力の偏向角}{deflection}
+$F(u)=0$ の最初の解 $u_{\max}=1/r_{\min}$ が最接近である。
+無限遠（$u=0$）から最接近までに回る角を $\varphi_0$ とすると、軌道は対称なので、偏向角は
+\begin{equation}
+  \Theta=\pi-2\varphi_0,\qquad\varphi_0=\int_0^{u_{\max}}\frac{\rho\,\dd u}{\sqrt{F(u)}} .
+  \label{eq:deflection}
+\end{equation}
+斥力では $\Theta>0$、引力では $\Theta<0$ で、散乱角は $\chi=\abs{\Theta}$ である。
+\end{result}
+
+式~\eqref{eq:deflection} の積分は、端で $1/\sqrt{\ }$ の特異性を持つが、有限である。
+このプロジェクトでは $u=u_{\max}(1-s^2)$ と置換して特異性を消し、ガウス・ルジャンドル求積で計算している
+（\path{src/physlab/numerics/quadrature.py}）。
+（引力で中心に回り込むような力では、式~\eqref{eq:deflection} の $\chi$ との対応に注意が要る。この章では扱わない。）
+
+\subsection{例：固い球}
+
+半径 $a$ の固い球に当たった粒子は、鏡のように跳ね返る。当たる点の向きと入射の逆向きがなす角が $\varphi_0$ なので
+$\rho=a\sin\varphi_0$。$\chi=\pi-2\varphi_0$ より
+\begin{equation}
+  \rho=a\cos\frac\chi2,\qquad
+  \diff{\sigma}{\Omega}=\frac{a\cos(\chi/2)}{\sin\chi}\cdot\frac a2\sin\frac\chi2=\frac{a^2}{4}.
+  \label{eq:hard-sphere}
+\end{equation}
+\textbf{どの向きにも同じ割合で出る}。全断面積は $4\pi\cdot a^2/4=\pi a^2$ で、球の見かけの面積に等しい。
+
+\subsection{実験室系の断面積}
+
+静止した標的の実験では、観測するのは $\theta_1$ である。粒子の数は系の取り方で変わらないので、
+$\dd\sigma$ をそのまま使い、角だけを式~\eqref{eq:elastic-angles} で読み替える。
+固い球のように重心系で等方的なら、$\theta_1$ の分布は崩壊の分布~\eqref{eq:decay-density}（$k=m_1/m_2$）と同じで、
+\begin{equation}
+  \diff{\sigma}{\Omega_1}=\sigma\,\frac{P(\theta_1)}{2\pi\sin\theta_1}\qquad(\sigma=\pi a^2).
+\end{equation}
+たとえば等しい質量では $\dd\sigma/\dd\Omega_1=a^2\cos\theta_1$（$\theta_1<\pi/2$）になる。
+
+\physfig[0.98]{sca-lab-frame}{固い球どうしの衝突を実験室系で数えた断面積。重心系ではどの向きにも同じでも、
+実験室系では質量比によって形が大きく変わる。}{sca-lab-frame}
+
+\subsection{虹散乱：断面積が無限大になる角}
+
+なめらかな丘 $U=U_0\ee^{-r^2/a^2}$ に撃ち込む。
+\begin{itemize}
+  \item $E<U_0$: 正面から来た粒子は跳ね返る（$\chi=\pi$）。$\rho$ を増やすと $\chi$ は単調に 0 へ減る。
+  \item $E>U_0$: 正面から来た粒子は丘を乗り越えて直進する（$\chi=0$）。遠くを通る粒子も $\chi\approx0$。
+    \textbf{その間に $\chi$ の最大値がある}。
+\end{itemize}
+最大値 $\chi_r$ では $\dd\chi/\dd\rho=0$ なので、$\abs{\dd\rho/\dd\chi}$ が無限大になり、
+式~\eqref{eq:cross-section} の断面積が発散する。幅のある範囲の $\rho$ が、ほぼ同じ向きに出るためである。
+これを\textbf{虹散乱}という。雨粒を通った太陽の光が特定の角に集まって虹になるのと、同じ仕組みである。
+
+\physfig[0.97]{sca-deflection}{左: $E/U_0=1.5$ の粒子の束。出ていく向きがある角のところで密になる。
+右: 衝突パラメータと散乱角。線は式~\eqref{eq:deflection} の求積、点は運動方程式の時間積分。}{sca-deflection}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run scattering      # 図 3 枚と動画（outputs/mechanics/scattering_beam.mp4）
+\end{terminal}
+円板の中に一様に \num{200000} 個を打ち込み（$\rho=\rho_{\max}\sqrt{\xi}$、$\xi$ は一様乱数）、
+角の区間ごとに数える。区間の個数 $\Delta N$ から
+$\dd\sigma/\dd\Omega\approx\pi\rho_{\max}^2\,\Delta N/(N\,\Delta\Omega)$ である。
+\end{simbox}
+
+\physfig[0.98]{sca-cross-section}{数えた断面積。左: 固い球は式~\eqref{eq:hard-sphere} のとおり平ら。
+右: 丘では虹の角の手前で増え、その外には 1 個も出ない（右端の点は、虹の角を含む区間の分）。}{sca-cross-section}
+
+\begin{itemize}
+  \item 求積と時間積分の偏向角の差は $6\times10^{-8}$ 以下。
+  \item 固い球は、全区間で $a^2/4$ とのずれが統計誤差の 2.0 倍以内。
+  \item 丘（$E/U_0=1.5$）の虹の角は $\chi_r=\ang{36.25}$（$\rho=0.390\,a$）。24 区間のずれは統計誤差の 3.4 倍以内。
+\end{itemize}
+
+%% ================================================================
+\section{ラザフォードの公式}\label{sec:coll-rutherford}
+\correspondsto{ランダウ＝リフシッツ §19}
+
+\subsection{クーロン力の軌道を解く}
+
+点電荷どうしの $U=\alpha/r$（$\alpha>0$ が斥力）を考える。$d=\alpha/E$ とおくと、
+これは正面衝突で粒子が止まって引き返す距離である。式~\eqref{eq:orbit-F} は $u$ の 2 次式になり、平方完成できる。
+\begin{equation}
+  F(u)=1-du-\rho^2u^2=(1+a^2)-(\rho u+a)^2,\qquad a=\frac{d}{2\rho}.
+\end{equation}
+$w=\rho u+a$ と置くと、$u=0$ で $w=a$、$F=0$ で $w=\sqrt{1+a^2}$ なので
+\begin{equation}
+  \varphi_0=\int_a^{\sqrt{1+a^2}}\frac{\dd w}{\sqrt{(1+a^2)-w^2}}
+  =\frac\pi2-\arcsin\frac{a}{\sqrt{1+a^2}}=\frac\pi2-\arctan a .
+\end{equation}
+したがって $\Theta=\pi-2\varphi_0=2\arctan a$。
+
+\begin{result}{クーロン力の散乱角}{rutherford-angle}
+\begin{equation}
+  \tan\frac\chi2=\frac{d}{2\rho},\qquad\rho=\frac d2\cot\frac\chi2,\qquad d=\frac{\abs{\alpha}}{E}.
+  \label{eq:rutherford-angle}
+\end{equation}
+引力（$\alpha<0$）では偏向の向きが逆になるだけで、大きさは同じである。
+\end{result}
+
+\physfig[0.97]{rut-orbits}{左: 斥力の軌道の束。破線は半径 $d$ の円。どの軌道もこの円の内側に入らない。
+右: 同じ $\rho$ の斥力と引力。曲がる角の大きさは同じ。}{rut-orbits}
+
+\subsection{断面積}
+
+式~\eqref{eq:rutherford-angle} を微分すると $\abs{\dd\rho/\dd\chi}=d/\bigl(4\sin^2(\chi/2)\bigr)$。
+式~\eqref{eq:cross-section} に入れ、$\sin\chi=2\sin(\chi/2)\cos(\chi/2)$ を使うと
+\begin{equation}
+  \diff{\sigma}{\Omega}
+  =\frac{(d/2)\cot(\chi/2)}{2\sin(\chi/2)\cos(\chi/2)}\cdot\frac{d}{4\sin^2(\chi/2)}
+  =\frac{d^2}{16\sin^4(\chi/2)} .
+\end{equation}
+
+\begin{result}{ラザフォードの公式}{rutherford}
+\begin{equation}
+  \diff{\sigma}{\Omega}=\left(\frac{\alpha}{2\mu v_\infty^2}\right)^2\frac{1}{\sin^4(\chi/2)} .
+  \label{eq:rutherford}
+\end{equation}
+\end{result}
+
+読み取れること。
+\begin{itemize}
+  \item $\alpha$ の 2 乗なので、\textbf{引力でも斥力でも同じ}。
+  \item $v_\infty^4$ に反比例する。速い粒子は曲がりにくい。
+  \item $\chi\to0$ で発散し、全断面積は無限大になる。クーロン力はどこまでも届くからである
+    （\ref{sec:coll-small}節）。
+\end{itemize}
+
+最接近の距離は $F(1/r)=0$、すなわち $r^2-dr-\rho^2=0$ を解いて、式~\eqref{eq:rutherford-angle} を使うと
+\begin{equation}
+  r_{\min}=\frac d2+\sqrt{\frac{d^2}{4}+\rho^2}=\frac d2\left(1+\frac{1}{\sin(\chi/2)}\right)
+  \qquad(\text{斥力}).
+  \label{eq:closest}
+\end{equation}
+
+\subsection{標的に渡るエネルギー}
+
+静止した標的 $m_2$ に渡るエネルギーは、式~\eqref{eq:energy-transfer} より
+$\epsilon=\epsilon_{\max}\sin^2(\chi/2)$、$\epsilon_{\max}=2\mu^2v_\infty^2/m_2$ である。
+「$\chi$ より大きく曲がる断面積」$\pi\rho(\chi)^2$ は、「$\epsilon$ より多く渡す断面積」と同じなので
+\begin{equation}
+  \sigma(>\epsilon)=\pi\frac{d^2}{4}\cot^2\frac\chi2=\pi\frac{d^2}{4}\left(\frac{\epsilon_{\max}}{\epsilon}-1\right).
+\end{equation}
+$\epsilon$ で微分して符号を変え、$d=2\alpha/(\mu v_\infty^2)$ を入れると
+\begin{equation}
+  \dd\sigma=\frac{2\pi\alpha^2}{m_2v_\infty^2}\,\frac{\dd\epsilon}{\epsilon^2}.
+  \label{eq:rutherford-energy}
+\end{equation}
+入射粒子の質量は現れない。小さなエネルギーを渡す衝突が圧倒的に多い。
+
+\subsection{数えて確かめる}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run rutherford      # 図 3 枚と動画（outputs/mechanics/rutherford.mp4）
+\end{terminal}
+$d=1$ の単位で \num{200000} 個を打ち込み、\ang{20} 以上を 16 区間に分けて数える。
+偏向角は式~\eqref{eq:rutherford-angle} を使わず、式~\eqref{eq:deflection} の求積で計算している。
+\end{simbox}
+
+\begin{table}[htbp]
+\centering
+\caption{数えた $\dd\sigma/\dd\Omega$ と公式（単位は $d^2$）}\label{tab:rutherford}
+\begin{tabular}{crcc}
+\toprule
+区間 & 個数 & 数えた値 & 公式の区間平均 \\
+\midrule
+\ang{20}〜\ang{30}   & \num{91332} & 30.889 & 30.942 \\
+\ang{60}〜\ang{70}   & \num{4683}  & 0.7385 & 0.7599 \\
+\ang{100}〜\ang{110} & \num{1102}  & 0.1631 & 0.1587 \\
+\ang{140}〜\ang{150} & 318         & 0.0792 & 0.0759 \\
+\ang{170}〜\ang{180} & 43          & 0.0705 & 0.0630 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\physfig[0.97]{rut-cross-section}{左: 向きの分布は 3 桁近くにわたって公式に従う。
+右: 標的に渡るエネルギーの分布は、両対数で傾き $-2$ の直線になる。}{rut-cross-section}
+
+全 16 区間で、公式とのずれは統計誤差の 2.0 倍以内だった。大きな角ほど数が少なく、ばらつきも大きい。
+エネルギーの分布の傾きは $-2.002$ だった。時間積分で追った軌道の偏向角と最接近距離は、
+式~\eqref{eq:rutherford-angle}、\eqref{eq:closest} と $3\times10^{-8}$ の範囲で一致する。
+
+\subsection{原子の中の正電荷はどこにあるか}\label{sec:coll-nucleus}
+
+ラザフォードの公式が有名なのは、原子の構造を決めたからである。
+ガイガーとマースデンは、薄い金属の箔に当てた $\alpha$ 粒子の中に、大きく跳ね返るものがあることを見いだし、
+ラザフォードは 1911 年に、原子の正電荷は中心のごく小さな部分（原子核）に集まっていると結論した。
+
+大きさの見積もりをしてみる。\qty{5.5}{MeV} の $\alpha$ 粒子（電荷 2）と金の原子核（電荷 79）では、
+$\alpha=2\times79\times\qty{1.440}{MeV.fm}=\qty{227.5}{MeV.fm}$ で、
+正面衝突の最接近は $d=\qty{41.4}{fm}$（$\qty{1}{fm}=\qty{e-15}{m}$）である。
+原子核の半径は約 \qty{7}{fm}、原子の半径は約 \qty{1.44e5}{fm} である
+（標的の反跳と電子による遮蔽は無視する）。
+\begin{itemize}
+  \item 原子核が点のようにふるまうのは、$\alpha$ 粒子が表面まで届かないからである。
+  \item 厚さ \qty{400}{nm} の金の箔では、\ang{90} 以上曲がる割合は
+    $n\,t\,\pi(d/2)^2=3.2\times10^{-5}$（約 3 万個に 1 個）。数は少ないが、0 ではない。
+  \item 電子は $\alpha$ 粒子の約 7300 分の 1 の質量しかない。重い粒子が曲がる角の上限
+    $\sin\theta_{1\max}=m_2/m_1$（\ref{sec:coll-elastic}節）より、電子 1 個は \ang{0.0079} しか曲げられない。
+  \item もし正電荷が原子全体に一様に広がっていたら（$R\approx3500\,d$）、
+    1 回の衝突で曲がる角は最大 \ang{0.0168} である。
+\end{itemize}
+つまり、正電荷が広がった原子では、1 回の衝突で大きく跳ね返ることは起こらない。
+（小さな偏向が何度も積み重なる場合は、向きがばらばらに足されるので大角にはなりにくい。
+この章ではその分布は計算していない。）
+
+\subsection*{電荷を広げると何が変わるか}
+
+半径 $R$ の球に電荷が一様に広がっている場合を調べる。球の外では点電荷と同じ $\alpha/r$ である。
+球の中では内側の電荷だけが力を及ぼすので力は $r$ に比例し、表面でつながるように積分すると
+\begin{equation}
+  U(r)=\frac{\alpha}{2R}\left(3-\frac{r^2}{R^2}\right)\qquad(r<R).
+  \label{eq:uniform-ball}
+\end{equation}
+軌道が球に入るかどうかは、式~\eqref{eq:closest} で決まる。$r_{\min}=R$ となる角は
+\begin{equation}
+  \sin\frac{\chi_g}{2}=\frac{1}{2R/d-1}
+  \label{eq:graze}
+\end{equation}
+で、\textbf{これより小さい角の散乱は点電荷と区別できない}。
+\begin{itemize}
+  \item $R<d$: どの軌道も球に入らない。点電荷と完全に同じ。
+  \item $d<R<1.5\,d$: $\chi_g$ より大きい角でずれる。$R=1.4\,d$ なら $\chi_g=\ang{67.5}$。
+  \item $R>1.5\,d$: 中心の高さ $U(0)=3\alpha/2R$ が $E$ より低く、正面の粒子は通り抜ける。
+    散乱角に最大値ができる（虹散乱）。$R=3\,d$ では \ang{24.27}。
+\end{itemize}
+
+\physfig[0.97]{rut-charge-size}{電荷を半径 $R$ の球に広げる。$R=0.8\,d$ は点電荷（破線）に重なる。
+$R=1.4\,d$ は \ang{70}〜\ang{90} で増え、それより大きい角で減る。$R=3\,d$ は大角散乱がなくなる（右の図では \ang{30} 未満の区間だけに点がある）。}{rut-charge-size}
+
+数えた結果でも、$R=1.4\,d$ は \ang{70} より下の区間では点電荷と一致し、
+\ang{70}〜\ang{80} で 1.43 倍、\ang{150}〜\ang{160} で 0.11 倍になった。
+\textbf{どの角からずれ始めるかを測れば、電荷の広がりが分かる}。
+実際の原子核では、表面まで近づくと核力も働くので、ずれ方は静電気だけで計算したこの図とは違う。
+
+%% ================================================================
+\section{微小角の散乱}\label{sec:coll-small}
+\correspondsto{ランダウ＝リフシッツ §20}
+
+\subsection{直線に沿った力積}
+
+遠くを通る粒子や、とても速い粒子は、ほとんど曲がらない。
+そのときは、\textbf{まっすぐ進んだと仮定して}、横向きに受けた力積だけを計算すればよい。
+軌道を $y=\rho$、$x=v_\infty t$ とすると、横向きの運動量は
+\begin{equation}
+  p_y=\int_{-\infty}^{\infty}F_y\,\dd t
+  =-\frac{1}{v_\infty}\int_{-\infty}^{\infty}\diff Ur\,\frac{\rho}{r}\,\dd x,\qquad r=\sqrt{x^2+\rho^2}.
+\end{equation}
+被積分関数は $x$ について偶関数で、$x>0$ では $\dd x=r\,\dd r/\sqrt{r^2-\rho^2}$。
+偏向角は $\theta\approx p_y/(\mu v_\infty)$ なので、次を得る。
+
+\begin{result}{微小角の偏向}{small-angle}
+\begin{equation}
+  \chi\approx-\frac{2\rho}{\mu v_\infty^2}\int_\rho^\infty\diff Ur\,\frac{\dd r}{\sqrt{r^2-\rho^2}} .
+  \label{eq:small-angle}
+\end{equation}
+\end{result}
+
+実験室系の $\theta_1$ は、同じ $p_y$ を入射粒子の運動量で割った $p_y/(m_1v_\infty)$ である。
+これは式~\eqref{eq:elastic-angles} で $\chi$ を小さくした $\theta_1\approx m_2\chi/(m_1+m_2)$ と一致する。
+
+\subsection{べき型の力}
+
+$U=\alpha/r^n$ なら、$r=\rho/\cos u$ と置くと積分は $\rho^{-(n+1)}\int_0^{\pi/2}\cos^nu\,\dd u$ になる。
+この積分はガンマ関数で書けて
+\begin{equation}
+  \chi\approx\frac{2n\alpha}{\mu v_\infty^2\rho^n}\int_0^{\pi/2}\cos^nu\,\dd u
+  =\frac{2\sqrt\pi\,\alpha}{\mu v_\infty^2\rho^n}\,
+  \frac{\Gamma\bigl(\frac{n+1}{2}\bigr)}{\Gamma\bigl(\frac n2\bigr)} .
+  \label{eq:small-angle-power}
+\end{equation}
+$n=1$ では $\chi=2\alpha/(\mu v_\infty^2\rho)=d/\rho$ で、式~\eqref{eq:rutherford-angle} の小さい角と一致する。
+
+\subsection{断面積と、全断面積が無限大になる理由}
+
+$\chi=A\rho^{-n}$ と書くと $\rho=(A/\chi)^{1/n}$ なので、式~\eqref{eq:cross-section} で $\sin\chi\approx\chi$ として
+\begin{equation}
+  \diff{\sigma}{\Omega}\approx\frac1n A^{2/n}\,\chi^{-2-2/n}.
+  \label{eq:small-angle-sigma}
+\end{equation}
+$\chi_{\min}$ より大きく曲がる断面積は $\pi\rho(\chi_{\min})^2=\pi(A/\chi_{\min})^{2/n}$ で、
+$\chi_{\min}\to0$ で無限大になる。どんなに遠くを通っても、力が少しでもあれば少しは曲がるからである。
+古典力学で全断面積が有限になるのは、固い球のように、ある距離より外で力が\textbf{厳密に} 0 の場合だけである。
+
+\subsection{シミュレーションで確かめる}
+
+\begin{simbox}
+\begin{terminal}
+uv run physlab run small-angle      # 図 2 枚
+\end{terminal}
+\end{simbox}
+
+ガウス型の丘を $E/U_0=10$、$\rho=0.7\,a$ で通り抜ける軌道では、
+厳密な偏向角 \ang{4.446} に対して、力積の近似は \ang{4.355}（差は約 2\%）だった。
+
+\physfig[0.9]{sma-impulse}{ほとんど曲がらない軌道。横向きの力は、実際の軌道の上でも直線の上でも、ほぼ同じである。
+その時間積分が横向きの運動量になる。}{sma-impulse}
+
+ガウス型の丘では、式~\eqref{eq:small-angle} は $\chi=\sqrt\pi\,(U_0/E)(\rho/a)\,\ee^{-\rho^2/a^2}$ になる。
+$\rho=a/\sqrt2$ で最大値 $\sqrt{\pi/2\ee}\,U_0/E=0.760\,U_0/E$ を取り、これが虹の角の見積もりになる。
+
+\begin{table}[htbp]
+\centering
+\caption{ガウス型の丘の虹の角}\label{tab:rainbow}
+\begin{tabular}{rccc}
+\toprule
+$E/U_0$ & 虹を作る $\rho/a$ & 虹の角（求積） & 力積の近似 \\
+\midrule
+1.5 & 0.390 & \ang{36.25} & \ang{29.04} \\
+3   & 0.568 & \ang{15.82} & \ang{14.52} \\
+10  & 0.668 & \ang{4.455} & \ang{4.355} \\
+30  & 0.694 & \ang{1.462} & \ang{1.452} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+エネルギーが高いほど近似は良くなり、虹を作る $\rho$ は $a/\sqrt2=0.707\,a$ に近づく。
+
+\subsection*{誤差の減り方：クーロン力だけが特別}
+
+同じ $\rho$ で力の強さを変え、近似の相対誤差を偏向角に対して描いた（図~\ref{fig:sma-error}左）。
+
+\physfig[0.98]{sma-error}{左: 力積の近似の相対誤差。多くの力では角に比例して減るが、$\alpha/r$ は角の 2 乗で減る。
+右: $U=\alpha/r^n$ の小さい角の断面積は、式~\eqref{eq:small-angle-sigma} の傾きになる。}{sma-error}
+
+偏向角がおよそ $0.09$ のとき、相対誤差は $\alpha/r$ で $6.5\times10^{-4}$、$\alpha/r^2$ で $4.5\times10^{-2}$、
+$\alpha/r^4$ で $8.8\times10^{-2}$、ガウス型で $1.9\times10^{-2}$ だった。
+力積の近似は、偏向角を力の強さで展開した\textbf{1 次の項}である。誤差は 2 次の項から来る。
+クーロン力は、式~\eqref{eq:rutherford-angle} のとおり引力と斥力で偏向が鏡像になる（$\alpha$ の奇関数）ので、
+2 次の項がなく、相対誤差は $\chi^2/12$ になる。
+$\alpha/r^2$ の厳密な解は $\chi=\pi\bigl(1-1/\sqrt{1+x}\bigr)$（$x=\alpha/E\rho^2$）で、
+$\pi(x/2-3x^2/8+\cdots)$ と 2 次の項があるので、誤差は角の 1 乗で減る。
+
+断面積の両対数の傾きは、$n=1,2,4$ で $-4.000,\ -3.000,\ -2.494$（理論 $-4,\,-3,\,-2.5$）だった。
+
+\subsection*{広がった電荷は、円柱の中だけが効く}
+
+力積の近似を使うと、\ref{sec:coll-nucleus}節の「広がった電荷では \ang{0.0168}」が式で分かる。
+小さい点電荷 1 つから受ける横向きの力積は、直線との距離に反比例し、直線からその電荷の位置を
+入射方向につぶした点へ向かう方向を持つ。これは、紙面に垂直な直線状の電荷がつくる電場と同じ形である。
+軸対称な分布なら、ガウスの法則により、\textbf{半径 $\rho$ の円柱（入射方向に平行）の中の電荷だけ}が効き、
+\begin{equation}
+  \chi\approx\frac{d}{\rho}\,f(\rho),\qquad
+  f(\rho)=1-\left(1-\frac{\rho^2}{R^2}\right)^{3/2}\quad(\text{一様な球}).
+  \label{eq:projected}
+\end{equation}
+$f$ は円柱の中にある電荷の割合である。$\chi$ は $\rho=0.931\,R$ で最大値 $1.022\,d/R$ を取る。
+$R/d=3481$ を入れると $2.94\times10^{-4}\,\mathrm{rad}=\ang{0.0168}$ で、
+求積で計算した値と一致する。
+
+%% ================================================================
+\clearpage % 表と「コードとの対応」の見出しが離れないように、ここで改ページする
+\section{検証のまとめ}\label{sec:coll-check}
+
+\begin{table}[htbp]
+\centering
+\caption{この章の主張と確かめ方（すべて \code{uv run pytest} で再現できる）}\label{tab:coll-check}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.36\linewidth}Lc@{}}
+\toprule
+主張 & 確かめ方 & 結果 \\
+\midrule
+崩壊の角度分布とエネルギー分布 & 乱数実験と式 & 統計誤差内 \\
+衝突後の運動量は円の上 & 4 種類の力で運動方程式を解く & $2\times10^{-6}$ \\
+偏向角の式~\eqref{eq:deflection} & 解析解、時間積分と比較 & $10^{-7}$ 以内 \\
+固い球は $a^2/4$ & 反射させて数える & 統計誤差内 \\
+虹の角で集中する & 数えた分布と理論 & 統計誤差内 \\
+ラザフォードの公式 & 打ち込んで数える & 統計誤差内 \\
+$\dd\sigma\propto\dd\epsilon/\epsilon^2$ & 標的の速度から数える & 傾き $-2.002$ \\
+微小角の近似 & 厳密な値との差の冪 & 1 乗または 2 乗 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{コードとの対応}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+種類 & 場所 \\
+\midrule
+設計書 & \path{docs/design/007-collisions.md} \\
+物理（domain） & \path{src/physlab/domain/mechanics/} の \path{decay.py}、\path{collision.py}、
+  \path{potentials.py}、\path{scattering.py}、\path{alpha_gold.py} \\
+数値解法 & \path{src/physlab/numerics/} の \path{quadrature.py}、\path{roots.py} \\
+ユースケース & \path{src/physlab/application/mechanics/} の \path{decay.py}、\path{elastic_collision.py}、
+  \path{deflection.py}、\path{scattering.py}、\path{rutherford.py}、\path{small_angle.py} \\
+コマンド & \code{decay}、\code{elastic-collision}、\code{scattering}、\code{rutherford}、\code{small-angle} \\
+知見 & \path{docs/knowledge/collisions.md} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+%% ================================================================
+\section{演習}\label{sec:coll-exercises}
+
+\begin{exercise}[基礎]{coll-share}
+静止している物体が \qty{2}{kg} と \qty{3}{kg} の 2 つに分裂し、\qty{15}{J} が運動エネルギーになった。
+それぞれの速さと運動エネルギーを求めよ。
+\end{exercise}
+
+\begin{exercise}[基礎]{coll-cone}
+問~\ref{ex:coll-share} の物体が、分裂の前に \qty{4}{m/s} で動いていた。
+それぞれの破片が飛び出せる向き（もとの進行方向から測る）の上限を求めよ。後ろ向きに飛ぶ破片はあるか。
+\end{exercise}
+
+\begin{exercise}[基礎]{coll-alpha-proton}
+$\alpha$ 粒子（質量 4）が、静止した陽子（質量 1）に弾性衝突する。
+$\alpha$ 粒子が曲がる角の上限と、陽子に渡るエネルギーの割合の最大値を求めよ。
+\end{exercise}
+
+\begin{exercise}[応用]{coll-many}
+\qty{4}{kg} の物体が、静止した状態から \qty{1}{kg}、\qty{1}{kg}、\qty{2}{kg} の 3 つに分かれ、
+合計 \qty{12}{J} が運動エネルギーになる。\qty{2}{kg} の破片、\qty{1}{kg} の破片が持てる最大の運動エネルギーは。
+\end{exercise}
+
+\begin{exercise}[応用]{coll-moderation}
+中性子が、静止した原子核（質量は中性子の $A$ 倍）と弾性衝突を繰り返す。重心系の散乱は等方的とする。
+(a) 1 回の衝突での $\ln(E/E')$ の平均 $\xi$ は、$\beta=\bigl(\tfrac{A-1}{A+1}\bigr)^2$ を使って
+$\xi=1+\dfrac{\beta\ln\beta}{1-\beta}$ となることを示せ。
+(b) \qty{2}{MeV} の中性子が \qty{0.025}{eV} になるまでの衝突回数の目安を、
+$A=1,\,2,\,12$ について求めよ。
+\end{exercise}
+
+\begin{exercise}[応用]{coll-sphere-back}
+半径 $a$ の固い球に、粒子の束を当てる。\ang{90} 以上曲がる粒子の断面積を求めよ。
+球に当たる粒子のうち、何割がそうなるか。
+\end{exercise}
+
+\begin{exercise}[応用]{coll-gold}
+\qty{8}{MeV} の $\alpha$ 粒子を、厚さ \qty{400}{nm} の金の箔（原子の数密度 \qty{5.90e28}{m^{-3}}）に当てる。
+正面衝突の最接近距離と、\ang{90} 以上曲がる割合を、\qty{5.5}{MeV} の場合と比べよ。
+\end{exercise}
+
+\begin{exercise}[応用]{coll-recoil}
+本章の金の見積もりでは、標的の反跳を無視した。\qty{5.5}{MeV} の $\alpha$ 粒子（質量 4）が
+金の原子核（質量 197）に渡せるエネルギーは最大でいくらか。
+\end{exercise}
+
+\begin{exercise}[応用]{coll-light}
+太陽の縁をかすめて光速で通過する粒子が、ニュートンの万有引力で曲げられる角を、
+式~\eqref{eq:small-angle-power} を使って秒角で求めよ。
+$GM=\qty{1.327e20}{m^3/s^2}$、太陽の半径は \qty{6.957e8}{m}。
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{coll-sim-hill}
+丘の散乱で $E/U_0=3$ にすると、虹の角はおよそ何度になるか。力積の近似で予想してから、実行して比べよ。
+\begin{terminal}
+uv run physlab run scattering --energy 3 --no-video
+\end{terminal}
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{coll-sim-mass}
+標的を入射粒子の半分の質量にすると、$\theta_1$ はどの力でも何度を超えないか。
+予想してから実行し、表~\ref{tab:coll-forces}の $m_2=2$ の場合と比べよ。
+\begin{terminal}
+uv run physlab run elastic-collision --m2 0.5 --no-video
+\end{terminal}
+\end{exercise}
+
+\begin{exercise}[シミュレーション]{coll-sim-ball}
+電荷の半径を $R=3\,d$ にすると、点電荷と同じに見える角の上限と、散乱角の最大値はいくつになるか。
+式~\eqref{eq:graze} で前者を計算してから、実行して確かめよ。
+\begin{terminal}
+uv run physlab run rutherford --ball-radius 3 --no-video
+\end{terminal}
+\end{exercise}
+
+%% ================================================================
+\section{まとめ}\label{sec:coll-summary}
+
+\begin{summary}
+\begin{itemize}
+  \item 崩壊と弾性衝突は、重心系（親の静止系）に移ると単純になる。速さは保存則で決まり、決まらないのは向きだけ。
+  \item 静止した標的との弾性衝突の $\bm p_2'$ は、力に依らず、中心 $\mu v$・半径 $\mu v$ の円の上にある。
+  \item 断面積は $\dd\sigma/\dd\Omega=(\rho/\sin\chi)\abs{\dd\rho/\dd\chi}$。力の情報は $\rho(\chi)$ に入っている。
+  \item クーロン力は $\dd\sigma/\dd\Omega=(d/4)^2/\sin^4(\chi/2)$。大きい角まで公式どおりなら、電荷はそれだけ狭い範囲にある。
+  \item 小さい角の散乱は、直線に沿った力積で見積もれる。遠くまで届く力の全断面積は無限大。
+\end{itemize}
+\end{summary}
+
+\section{発展}\label{sec:coll-advanced}
+\begin{itemize}
+  \item 非弾性衝突：内部エネルギーが変わると、運動量の円の半径が変わる。
+  \item 相対論的な衝突：速さが光速に近いと、エネルギーと運動量の関係が変わる。
+  \item 量子力学の散乱：クーロン力については同じラザフォードの公式が出るが、一般には波の干渉が現れ、
+    全断面積が有限になる場合もある。
+  \item 中心に回り込む引力では、同じ角に何度も回って出る軌道が現れる。
+  \item この章で使った中心力の積分（\ref{sec:coll-orbit}節）は、束縛運動（ケプラー問題）にもそのまま使える。
+\end{itemize}
+
+%% ================================================================
+\section{演習の解答}\label{sec:coll-solutions}
+
+\begin{solution}{coll-share}
+$\mu=\tfrac{2\cdot3}{5}=\qty{1.2}{kg}$、$p_0=\sqrt{2\cdot1.2\cdot15}=\qty{6}{kg.m/s}$。
+速さは \qty{3}{m/s}（\qty{2}{kg}）と \qty{2}{m/s}（\qty{3}{kg}）、
+運動エネルギーは \qty{9}{J} と \qty{6}{J}。軽いほうが多い。
+\end{solution}
+
+\begin{solution}{coll-cone}
+どちらの破片も $v_0<V=\qty{4}{m/s}$ なので、式~\eqref{eq:decay-thmax} より
+\qty{2}{kg} の破片は $\arcsin(3/4)=\ang{48.6}$、\qty{3}{kg} の破片は $\arcsin(2/4)=\ang{30}$ が上限。
+後ろ向き（\ang{90} より大きい角）に飛ぶ破片はない。
+\end{solution}
+
+\begin{solution}{coll-alpha-proton}
+$\sin\theta_{1\max}=m_2/m_1=1/4$ より \ang{14.5}。
+式~\eqref{eq:energy-transfer} の最大は $4\cdot4\cdot1/5^2=0.64$。
+\end{solution}
+
+\begin{solution}{coll-many}
+式~\eqref{eq:many-body-max} より、\qty{2}{kg} の破片は $\tfrac{4-2}{4}\cdot12=\qty{6}{J}$、
+\qty{1}{kg} の破片は $\tfrac{4-1}{4}\cdot12=\qty{9}{J}$。
+\end{solution}
+
+\begin{solution}{coll-moderation}
+(a) 式~\eqref{eq:elastic-speeds} より $E'/E=\dfrac{1+A^2+2A\cos\chi}{(1+A)^2}$。
+重心系で等方的なら $\cos\chi$ は一様なので、$x=E'/E$ は $\beta$ から 1 まで一様に分布する。よって
+\begin{equation*}
+  \xi=-\frac{1}{1-\beta}\int_\beta^1\ln x\,\dd x
+  =-\frac{(-1)-(\beta\ln\beta-\beta)}{1-\beta}=1+\frac{\beta\ln\beta}{1-\beta}.
+\end{equation*}
+$A=1$ では $\beta\to0$ で $\xi=1$。
+(b) $\ln(\qty{2e6}{eV}/\qty{0.025}{eV})=18.20$ を $\xi$ で割る。
+$A=1$: $\xi=1$ で約 18 回。$A=2$: $\xi=0.725$ で約 25 回。$A=12$: $\xi=0.158$ で約 115 回。
+\end{solution}
+
+\begin{solution}{coll-sphere-back}
+式~\eqref{eq:hard-sphere} より、$\chi\ge\ang{90}$ は $\rho\le a\cos\ang{45}$。
+断面積は $\pi a^2/2$ で、球に当たる粒子のちょうど半分である（等方的なので、前後で同じ）。
+\end{solution}
+
+\begin{solution}{coll-gold}
+$d=227.5/8=\qty{28.4}{fm}$（\qty{5.5}{MeV} では \qty{41.4}{fm}）。
+割合は $n t\pi(d/2)^2$ で $d^2$ に比例するので $(5.5/8)^2$ 倍になり、$1.5\times10^{-5}$
+（\qty{5.5}{MeV} では $3.2\times10^{-5}$）。
+\end{solution}
+
+\begin{solution}{coll-recoil}
+式~\eqref{eq:energy-transfer} の最大は $4\cdot4\cdot197/201^2=0.078$。
+\qty{5.5}{MeV} の 7.8\%、約 \qty{0.43}{MeV} である。これは正面衝突の値で、
+小さい角の衝突で渡るエネルギーはずっと少ない。
+\end{solution}
+
+\begin{solution}{coll-light}
+万有引力は $U=-GMm/r$ なので、式~\eqref{eq:small-angle-power}（$n=1$）で $\mu\approx m$ として
+$\chi=2GM/(c^2\rho)$。$\rho$ に太陽の半径を入れると $4.24\times10^{-6}\,\mathrm{rad}=0.875$ 秒角。
+粒子の質量は消える。一般相対性理論が予言する光の曲がりは、この 2 倍とされる。
+\end{solution}
+
+\begin{solution}{coll-sim-hill}
+力積の近似では $0.760/3\,\mathrm{rad}=\ang{14.5}$。実行すると \ang{15.82}（$\rho=0.568\,a$）で、
+差は約 1 割。$E/U_0=1.5$ の場合（\ang{29.0} に対して \ang{36.25}）より近い。
+\end{solution}
+
+\begin{solution}{coll-sim-mass}
+$\sin\theta_{1\max}=0.5$ より \ang{30} を超えない。$\rho=0.6$ の実行結果は、
+$\theta_1$ が柔らかい円板で \ang{22.0}、ガウス型で \ang{28.6}、湯川型で \ang{27.7}、急な芯で \ang{27.9}。
+重心系の $\chi$ は \ang{70}〜\ang{102} と力によって違うが、$\theta_1$ はすべて上限の内側にある。
+\end{solution}
+
+\begin{solution}{coll-sim-ball}
+式~\eqref{eq:graze} より $\sin(\chi_g/2)=1/5$、$\chi_g=\ang{23.07}$。
+実行すると散乱角の最大値は \ang{24.27} で、$\chi_g$ より少しだけ大きい。
+球の表面の少し内側を通る粒子が、点電荷をかすめる軌道より少し大きく曲がるためである。
+これより大きい角には 1 個も出ない。
+\end{solution}

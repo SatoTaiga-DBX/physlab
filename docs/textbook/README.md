@@ -31,12 +31,14 @@ uv run physlab run textbook        # 図の生成 → PDF → 検査。outputs/t
 | **第 III 部 解析力学**（参考: ランダウ＝リフシッツ『力学』） | | | | |
 | 第 3 章 | 運動方程式（参考: §1 一般座標 〜 §5 質点系のラグランジアン） | [tex](tex/chapters/02-analytical-mechanics/01-equations-of-motion.tex) | `generalized-coordinates`、`least-action`、`galilean` | 執筆済み |
 | 第 4 章 | 保存法則（参考: §6 エネルギー 〜 §10 力学的相似） | [tex](tex/chapters/02-analytical-mechanics/02-conservation-laws.tex) | `symmetry`、`center-of-mass`、`areal-velocity`、`similarity` | 執筆済み |
-| 第 5 章 | 運動方程式の積分（1 次元運動、中心力場、ケプラー問題） | | （予定） | 未着手 |
-| 第 6 章 | 微小振動 | | （予定） | 未着手 |
-| 第 7 章 | 正準方程式 | | （予定） | 未着手 |
+| 第 5 章 | 衝突と散乱（参考: §16 粒子の崩壊 〜 §20 微小角散乱） | [tex](tex/chapters/02-analytical-mechanics/03-collisions.tex) | `decay`、`elastic-collision`、`scattering`、`rutherford`、`small-angle` | 執筆済み |
+| （未定） | 運動方程式の積分（1 次元運動、中心力場、ケプラー問題） | | （予定） | 未着手 |
+| （未定） | 微小振動 | | （予定） | 未着手 |
+| （未定） | 正準方程式 | | （予定） | 未着手 |
 | **波動・流体** | （予定: 弦の振動、干渉、回折、拡散、移流、ナビエ–ストークス） | | | 未着手 |
 
-第 5 章以降は、ランダウ＝リフシッツ『力学』の第 III 章以降の話題を想定した並び（章立ては原典で確認する）。
+章番号は `main.tex` の並び順で自動的に付く。「運動方程式の積分」は参考書では衝突の前（第 III 章）なので、
+書いたら衝突の章の前に入れる予定（そのとき衝突の章は第 6 章になる）。衝突の章は、必要な中心力の積分を章の中で導いている。
 題材の候補は [../roadmap.md](../roadmap.md)。
 
 > **著作物について**: 解析力学の部は、ランダウ＝リフシッツ『力学』が扱う話題を参考にした**学習ノート**で、

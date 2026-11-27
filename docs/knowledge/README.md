@@ -19,3 +19,4 @@
 - [latex-textbook.md](latex-textbook.md) — TeX 教科書：LuaLaTeX（MiKTeX）の設定・警告・ハマった点
 - [copyright.md](copyright.md) — 著作権：参考書をもとに教科書を書くときの調査（条文・判例）と方針
 - [conservation-laws.md](conservation-laws.md) — 保存法則：対称性を壊す実験、積分法と保存量、力学的相似の実測値
+- [collisions.md](collisions.md) — 衝突と散乱：崩壊・弾性衝突・断面積・ラザフォード・微小角の実測値とハマった点
